@@ -72,12 +72,14 @@ class SceneManager {
     dirLight.position.set(40, 60, 30);
     this.scene.add(dirLight);
 
-    // 5. Build All 5 Cinematic Acts
+    // 5. Build All 7 Cinematic Acts
     this.buildAct1_Singularity();
     this.buildAct2_Cyberpunk();
     this.buildAct3_Quantum();
     this.buildAct4_HyperspaceFlight();
     this.buildAct5_MultiverseCodex();
+    this.buildAct6_DysonSphere();
+    this.buildAct7_Stargate();
 
     // 6. Set Act 1 Active
     this.setActiveAct(1, true);
@@ -87,6 +89,11 @@ class SceneManager {
     window.addEventListener('mousemove', (e) => this.onMouseMove(e));
     window.addEventListener('keydown', (e) => this.onKeyDown(e));
     window.addEventListener('keyup', (e) => this.onKeyUp(e));
+    window.addEventListener('pointerdown', (e) => {
+      if (this.currentAct === 4 && e.target.id === 'webgl-canvas') {
+        this.fireLasers();
+      }
+    });
 
     console.log('🚀 [SceneManager] Initialized 5 Cinematic Acts.');
   }
@@ -642,6 +649,241 @@ class SceneManager {
   }
 
   // ==========================================================================
+  // SHIP WEAPONS SYSTEM: PLASMA PHOTON CANNONS (ACT IV)
+  // ==========================================================================
+  fireLasers() {
+    if (this.currentAct !== 4 || !this.ship) return;
+
+    const now = performance.now();
+    if (this.lastLaserTime && now - this.lastLaserTime < 140) return;
+    this.lastLaserTime = now;
+
+    if (!this.lasers) this.lasers = [];
+
+    const laserGeo = new THREE.CylinderGeometry(0.08, 0.08, 3.5, 6);
+    laserGeo.rotateX(Math.PI / 2);
+    const laserMat = new THREE.MeshBasicMaterial({
+      color: 0x00ffff,
+      transparent: true,
+      opacity: 0.95
+    });
+
+    // Left & Right wing cannons
+    const offsets = [-1.8, 1.8];
+    offsets.forEach(xOffset => {
+      const laser = new THREE.Mesh(laserGeo, laserMat);
+      laser.position.set(this.shipPos.x + xOffset, this.shipPos.y, this.ship.position.z - 2.0);
+      this.actGroups[3].add(laser);
+      this.lasers.push(laser);
+    });
+
+    if (window.audioEngine) {
+      window.audioEngine.playLaserShot();
+    }
+  }
+
+  // ==========================================================================
+  // ACT VI: THE DYSON SPHERE & STELLAR HARVESTER
+  // ==========================================================================
+  buildAct6_DysonSphere() {
+    const group = new THREE.Group();
+    group.name = 'Act6_DysonSphere';
+
+    // Skybox with Dyson backdrop
+    const dysonSkyGeo = new THREE.SphereGeometry(800, 32, 32);
+    const textureLoader = new THREE.TextureLoader();
+    const dysonTex = textureLoader.load('assets/dyson.jpg');
+    dysonTex.wrapS = THREE.RepeatWrapping;
+    dysonTex.repeat.set(2, 1);
+    group.add(new THREE.Mesh(dysonSkyGeo, new THREE.MeshBasicMaterial({ map: dysonTex, side: THREE.BackSide })));
+
+    // 1. Central Blazing Star with Procedural Solar Surface Shader
+    const starGeo = new THREE.SphereGeometry(12, 64, 64);
+    const starMat = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.DysonSolarSurface.vertexShader,
+      fragmentShader: window.CustomShaders.DysonSolarSurface.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.DysonSolarSurface.uniforms)
+    });
+    const starMesh = new THREE.Mesh(starGeo, starMat);
+    starMesh.name = 'dysonStar';
+    group.add(starMesh);
+
+    // Corona Glow Flare
+    const coronaGeo = new THREE.SphereGeometry(13.2, 32, 32);
+    const coronaMat = new THREE.MeshBasicMaterial({
+      color: 0xff8800,
+      transparent: true,
+      opacity: 0.35,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide
+    });
+    group.add(new THREE.Mesh(coronaGeo, coronaMat));
+
+    // Dynamic Central Point Light
+    const starLight = new THREE.PointLight(0xffaa22, 3.5, 300);
+    group.add(starLight);
+
+    // 2. Dyson Swarm Collector Rings & Hexagonal Solar Panels
+    const ringGroup = new THREE.Group();
+    ringGroup.name = 'dysonRings';
+
+    const panelGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.1, 6);
+    const panelMat = new THREE.MeshStandardMaterial({
+      color: 0x111622,
+      metalness: 0.95,
+      roughness: 0.15,
+      emissive: 0xffaa00,
+      emissiveIntensity: 0.4
+    });
+
+    const ringRadii = [22, 28, 34];
+    const ringTilts = [0.3, -0.6, 1.1];
+
+    ringRadii.forEach((radius, rIdx) => {
+      const subRing = new THREE.Group();
+      subRing.rotation.x = ringTilts[rIdx];
+      subRing.rotation.z = rIdx * 0.8;
+      subRing.userData = { rotSpeed: 0.003 * (rIdx % 2 === 0 ? 1 : -1) };
+
+      // Backbone Ring Truss
+      const trussGeo = new THREE.TorusGeometry(radius, 0.2, 16, 64);
+      const trussMat = new THREE.MeshStandardMaterial({ color: 0x445566, metalness: 0.8 });
+      subRing.add(new THREE.Mesh(trussGeo, trussMat));
+
+      // Hex Panels along circumference
+      const panelCount = 24;
+      for (let i = 0; i < panelCount; i++) {
+        const theta = (i / panelCount) * Math.PI * 2;
+        const panel = new THREE.Mesh(panelGeo, panelMat);
+        panel.position.set(radius * Math.cos(theta), 0, radius * Math.sin(theta));
+        panel.rotation.y = -theta;
+        panel.rotation.x = Math.PI / 2;
+        subRing.add(panel);
+      }
+      ringGroup.add(subRing);
+    });
+    group.add(ringGroup);
+
+    // 3. Orbiting Power Hub Satellite
+    const hub = new THREE.Mesh(
+      new THREE.OctahedronGeometry(2.2),
+      new THREE.MeshStandardMaterial({ color: 0x00f0ff, metalness: 0.9, roughness: 0.1 })
+    );
+    hub.name = 'dysonHub';
+    hub.position.set(42, 8, 0);
+    group.add(hub);
+
+    // Energy transfer beam line
+    const beamGeo = new THREE.CylinderGeometry(0.15, 0.15, 30, 8);
+    beamGeo.rotateZ(Math.PI / 2);
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0xffea00,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending
+    });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.name = 'energyBeam';
+    beam.position.set(21, 4, 0);
+    group.add(beam);
+
+    this.scene.add(group);
+    this.actGroups[5] = group;
+  }
+
+  // ==========================================================================
+  // ACT VII: THE TACHYON STARGATE (MULTIVERSE EVENT HORIZON)
+  // ==========================================================================
+  buildAct7_Stargate() {
+    const group = new THREE.Group();
+    group.name = 'Act7_Stargate';
+
+    // Skybox with Stargate Rift
+    const gateSkyGeo = new THREE.SphereGeometry(800, 32, 32);
+    const textureLoader = new THREE.TextureLoader();
+    const gateTex = textureLoader.load('assets/stargate.jpg');
+    gateTex.wrapS = THREE.RepeatWrapping;
+    gateTex.repeat.set(2, 1);
+    group.add(new THREE.Mesh(gateSkyGeo, new THREE.MeshBasicMaterial({ map: gateTex, side: THREE.BackSide })));
+
+    // 1. Outer Heavy Metallic Ring Structure
+    const outerRingGeo = new THREE.TorusGeometry(14, 1.4, 32, 80);
+    const outerRingMat = new THREE.MeshStandardMaterial({
+      color: 0x222a36,
+      metalness: 0.9,
+      roughness: 0.3
+    });
+    const outerRing = new THREE.Mesh(outerRingGeo, outerRingMat);
+    group.add(outerRing);
+
+    // 2. Inner Rotating Glyph Dial Ring
+    const dialGeo = new THREE.TorusGeometry(12.5, 0.45, 16, 64);
+    const dialMat = new THREE.MeshStandardMaterial({
+      color: 0x334455,
+      metalness: 0.95,
+      roughness: 0.2,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 0.35
+    });
+    const dialRing = new THREE.Mesh(dialGeo, dialMat);
+    dialRing.name = 'stargateDial';
+    group.add(dialRing);
+
+    // 3. Chevrons (9 Radial Lock Mechanisms)
+    const chevronGeo = new THREE.BoxGeometry(1.6, 2.2, 1.8);
+    const chevronMat = new THREE.MeshStandardMaterial({
+      color: 0x111620,
+      emissive: 0x00a0ff,
+      emissiveIntensity: 0.8
+    });
+    for (let i = 0; i < 9; i++) {
+      const angle = (i / 9) * Math.PI * 2;
+      const chevron = new THREE.Mesh(chevronGeo, chevronMat);
+      chevron.position.set(14.2 * Math.cos(angle), 14.2 * Math.sin(angle), 0);
+      chevron.rotation.z = angle;
+      group.add(chevron);
+    }
+
+    // 4. Shimmering Dimensional Event Horizon
+    const horizonGeo = new THREE.CircleGeometry(12.0, 64);
+    const horizonMat = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.StargateHorizon.vertexShader,
+      fragmentShader: window.CustomShaders.StargateHorizon.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.StargateHorizon.uniforms),
+      side: THREE.DoubleSide,
+      transparent: true
+    });
+    const horizon = new THREE.Mesh(horizonGeo, horizonMat);
+    horizon.name = 'stargateHorizon';
+    group.add(horizon);
+
+    // 5. Dimensional Lightning Plasma Arcs
+    const sparkCount = 1200;
+    const sparkGeo = new THREE.BufferGeometry();
+    const sparkPositions = new Float32Array(sparkCount * 3);
+    for (let i = 0; i < sparkCount; i++) {
+      const th = Math.random() * Math.PI * 2;
+      const r = 4 + Math.random() * 8.0;
+      sparkPositions[i * 3] = r * Math.cos(th);
+      sparkPositions[i * 3 + 1] = r * Math.sin(th);
+      sparkPositions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+    }
+    sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPositions, 3));
+    const sparkMat = new THREE.PointsMaterial({
+      color: 0x70d0ff,
+      size: 0.35,
+      transparent: true,
+      blending: THREE.AdditiveBlending
+    });
+    const gateSparks = new THREE.Points(sparkGeo, sparkMat);
+    gateSparks.name = 'gateSparks';
+    group.add(gateSparks);
+
+    this.scene.add(group);
+    this.actGroups[6] = group;
+  }
+
+  // ==========================================================================
   // SCENE TRANSITIONS & ACT SWITCHING
   // ==========================================================================
   setActiveAct(actNumber, instant = false) {
@@ -679,6 +921,12 @@ class SceneManager {
     } else if (actNumber === 5) {
       this.camera.position.set(0, 10, 36);
       this.cameraTarget.set(0, 0, 0);
+    } else if (actNumber === 6) {
+      this.camera.position.set(0, 16, 60);
+      this.cameraTarget.set(0, 0, 0);
+    } else if (actNumber === 7) {
+      this.camera.position.set(0, 4, 32);
+      this.cameraTarget.set(0, 0, 0);
     }
 
     // Voice commentary
@@ -687,8 +935,10 @@ class SceneManager {
         1: "Act One: Gargantua Event Horizon. Accretion temperature 10 million Kelvin. Time dilation factor critical.",
         2: "Act Two: Sector Seven, Neo-Babylon. Atmospheric moisture 84 percent. Neural traffic online.",
         3: "Act Three: The Quantum Core. Calabi-Yau multi-dimensional manifold stabilized.",
-        4: "Act Four: Hyperspace Flight Simulator engaged. Use WASD or arrows to navigate warp acceleration rings.",
-        5: "Act Five: Multiverse Codex archive unlocked. Scanning planetary frequency and orbital beacons."
+        4: "Act Four: Hyperspace Flight Simulator engaged. Use WASD to steer and click to fire plasma cannons.",
+        5: "Act Five: Multiverse Codex archive unlocked. Scanning planetary frequency and orbital beacons.",
+        6: "Act Six: The Dyson Sphere Stellar Harvester. Solar energy flux 3.8 yottawatts. Collector swarm aligned.",
+        7: "Act Seven: The Tachyon Stargate. Dimensional rift open. Multiverse bridge synchronized."
       };
       window.voiceNarrator.speak(commentaries[actNumber], true);
     }
@@ -938,12 +1188,35 @@ class SceneManager {
             this.camera.position.x += (Math.random() - 0.5) * 0.8;
             this.camera.position.y += (Math.random() - 0.5) * 0.8;
             if (window.voiceNarrator) window.voiceNarrator.speak("Warning: Micrometeorite impact. Deflector shield absorbed shockwave.", false);
-          } else if (debris.position.z > 15) {
-            debris.position.z = -300 - Math.random() * 50;
-            debris.position.x = (Math.random() - 0.5) * 11;
-            debris.position.y = (Math.random() - 0.5) * 8;
+      // Update Laser Projectiles & Check Hits on Debris
+      if (this.lasers && this.lasers.length > 0) {
+        for (let l = this.lasers.length - 1; l >= 0; l--) {
+          const laser = this.lasers[l];
+          laser.position.z -= 180 * delta;
+
+          // Check hit on debris
+          let hit = false;
+          if (this.debrisField) {
+            for (let d = 0; d < this.debrisField.length; d++) {
+              const deb = this.debrisField[d];
+              if (laser.position.distanceTo(deb.position) < 2.5) {
+                // Target Destroyed!
+                deb.position.z = -320 - Math.random() * 40;
+                deb.position.x = (Math.random() - 0.5) * 11;
+                deb.position.y = (Math.random() - 0.5) * 8;
+                this.ringScore += 250;
+                if (window.audioEngine) window.audioEngine.playExplosion();
+                hit = true;
+                break;
+              }
+            }
           }
-        });
+
+          if (hit || laser.position.z < -280) {
+            this.actGroups[3].remove(laser);
+            this.lasers.splice(l, 1);
+          }
+        }
       }
     }
 
@@ -967,6 +1240,56 @@ class SceneManager {
           node.rotation.x += 0.02;
           node.rotation.y += 0.03;
         });
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // ACT 6 UPDATE: THE DYSON SPHERE
+    // ------------------------------------------------------------------------
+    else if (this.currentAct === 6) {
+      const g = this.actGroups[5];
+      const star = g.getObjectByName('dysonStar');
+      if (star) {
+        star.material.uniforms.time.value = elapsedTime;
+        star.material.uniforms.audioIntensity.value = audioIntensity;
+        star.rotation.y = elapsedTime * 0.05;
+      }
+      const rings = g.getObjectByName('dysonRings');
+      if (rings) {
+        rings.children.forEach(r => {
+          r.rotation.y += r.userData.rotSpeed;
+        });
+      }
+      const hub = g.getObjectByName('dysonHub');
+      if (hub) {
+        const hubAngle = elapsedTime * 0.2;
+        hub.position.x = Math.cos(hubAngle) * 44;
+        hub.position.z = Math.sin(hubAngle) * 44;
+        const beam = g.getObjectByName('energyBeam');
+        if (beam) {
+          beam.position.set(hub.position.x * 0.5, hub.position.y * 0.5, hub.position.z * 0.5);
+          beam.lookAt(hub.position);
+        }
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // ACT 7 UPDATE: TACHYON STARGATE
+    // ------------------------------------------------------------------------
+    else if (this.currentAct === 7) {
+      const g = this.actGroups[6];
+      const dial = g.getObjectByName('stargateDial');
+      if (dial) {
+        dial.rotation.z = -elapsedTime * 0.15;
+      }
+      const horizon = g.getObjectByName('stargateHorizon');
+      if (horizon) {
+        horizon.material.uniforms.time.value = elapsedTime;
+        horizon.material.uniforms.audioIntensity.value = audioIntensity;
+      }
+      const sparks = g.getObjectByName('gateSparks');
+      if (sparks) {
+        sparks.rotation.z = elapsedTime * 0.4;
       }
     }
 
@@ -1040,6 +1363,19 @@ class SceneManager {
         this.camera.position.x = Math.cos(pAngle) * 36 + this.mouse.x * 3 + shakeX;
         this.camera.position.z = Math.sin(pAngle) * 36 + this.mouse.y * 3;
         this.camera.position.y = 10 + Math.sin(elapsedTime * 0.3) * 4 + shakeY;
+        this.camera.lookAt(0, 0, 0);
+      } else if (this.currentAct === 6) {
+        // Grand high-angle cinematic survey of Dyson Swarm
+        const dAngle = elapsedTime * 0.09;
+        this.camera.position.x = Math.cos(dAngle) * 58 + shakeX;
+        this.camera.position.z = Math.sin(dAngle) * 58;
+        this.camera.position.y = 24 + Math.sin(elapsedTime * 0.2) * 6 + shakeY;
+        this.camera.lookAt(0, 0, 0);
+      } else if (this.currentAct === 7) {
+        // Dramatic Stargate event horizon push-in
+        this.camera.position.x = Math.sin(elapsedTime * 0.12) * 12 + shakeX;
+        this.camera.position.y = 4 + Math.cos(elapsedTime * 0.15) * 3 + shakeY;
+        this.camera.position.z = 28 + Math.sin(elapsedTime * 0.1) * 5;
         this.camera.lookAt(0, 0, 0);
       }
     } else if (this.cameraMode === 'cockpit') {
