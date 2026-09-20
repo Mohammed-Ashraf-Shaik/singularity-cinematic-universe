@@ -145,6 +145,14 @@ class HUDManager {
         this.terminal.toggle();
       } else if (k === 'b' && window.audioEngine) {
         window.audioEngine.playBraaam();
+      } else if (k === 'c') {
+        const modes = ['director', 'trailer', 'cockpit', 'free'];
+        const curIdx = modes.indexOf(this.sm.cameraMode);
+        const nextMode = modes[(curIdx + 1) % modes.length];
+        this.sm.setCameraMode(nextMode);
+        const directorBtns = document.querySelectorAll('.director-btn');
+        directorBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-cam') === nextMode));
+        if (window.audioEngine) window.audioEngine.playHoloBeep(980, 'sine');
       } else if (['1', '2', '3', '4', '5'].includes(k)) {
         const act = parseInt(k);
         this.sm.setActiveAct(act);

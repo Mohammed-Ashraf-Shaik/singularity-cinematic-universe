@@ -531,6 +531,30 @@ class SceneManager {
     streakField.name = 'warpStreaks';
     group.add(streakField);
 
+    // 5. Crystalline Space Debris Hazard Field
+    this.debrisField = [];
+    const debrisGeo = new THREE.DodecahedronGeometry(0.7, 0);
+    const debrisMat = new THREE.MeshStandardMaterial({
+      color: 0x223344,
+      emissive: 0x00ffff,
+      emissiveIntensity: 0.3,
+      roughness: 0.4,
+      metalness: 0.8
+    });
+    for (let i = 0; i < 18; i++) {
+      const debris = new THREE.Mesh(debrisGeo, debrisMat);
+      debris.position.set(
+        (Math.random() - 0.5) * 11,
+        (Math.random() - 0.5) * 8,
+        -50 - Math.random() * 250
+      );
+      debris.userData = {
+        rotSpeed: new THREE.Vector3((Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.05)
+      };
+      group.add(debris);
+      this.debrisField.push(debris);
+    }
+
     this.scene.add(group);
     this.actGroups[3] = group;
   }
@@ -682,6 +706,7 @@ class SceneManager {
 
   setCameraMode(mode) {
     this.cameraMode = mode;
+    this.lastCameraCutTime = this.clock.getElapsedTime();
     if (mode === 'free') {
       this.controls.enabled = true;
     } else {
@@ -895,6 +920,31 @@ class SceneManager {
           }
         }
       });
+
+      // Update Debris Field
+      if (this.debrisField) {
+        this.debrisField.forEach(debris => {
+          debris.position.z += speed * delta * 1.1;
+          debris.rotation.x += debris.userData.rotSpeed.x;
+          debris.rotation.y += debris.userData.rotSpeed.y;
+
+          // Check collision with ship
+          const distToShip = this.shipPos.distanceTo(debris.position);
+          if (distToShip < 1.8) {
+            // Collision event!
+            debris.position.z = -300;
+            if (window.audioEngine) window.audioEngine.playSubImpact();
+            // Screen shake
+            this.camera.position.x += (Math.random() - 0.5) * 0.8;
+            this.camera.position.y += (Math.random() - 0.5) * 0.8;
+            if (window.voiceNarrator) window.voiceNarrator.speak("Warning: Micrometeorite impact. Deflector shield absorbed shockwave.", false);
+          } else if (debris.position.z > 15) {
+            debris.position.z = -300 - Math.random() * 50;
+            debris.position.x = (Math.random() - 0.5) * 11;
+            debris.position.y = (Math.random() - 0.5) * 8;
+          }
+        });
+      }
     }
 
     // ------------------------------------------------------------------------
@@ -923,41 +973,84 @@ class SceneManager {
     // ------------------------------------------------------------------------
     // CAMERA CHOREOGRAPHY
     // ------------------------------------------------------------------------
-    if (this.cameraMode === 'director') {
+    // Handheld micro-shake for cinematic realism
+    const shakeX = (Math.sin(elapsedTime * 14.0) * 0.04) + (Math.cos(elapsedTime * 22.0) * 0.02);
+    const shakeY = (Math.cos(elapsedTime * 16.0) * 0.04) + (Math.sin(elapsedTime * 26.0) * 0.02);
+
+    if (this.cameraMode === 'director' || this.cameraMode === 'trailer') {
+      let shotPhase = 0;
+      if (this.cameraMode === 'trailer') {
+        // Cut every 7 seconds between 4 dynamic shot types
+        shotPhase = Math.floor((elapsedTime % 28) / 7);
+      }
+
       if (this.currentAct === 1) {
-        // Slow cinematic orbit around black hole
-        const camAngle = elapsedTime * 0.1;
-        const camR = 26 + Math.sin(elapsedTime * 0.15) * 4;
-        this.camera.position.x = Math.cos(camAngle) * camR + this.mouse.x * 2;
-        this.camera.position.z = Math.sin(camAngle) * camR + this.mouse.y * 2;
-        this.camera.position.y = 7 + Math.sin(elapsedTime * 0.2) * 3;
-        this.camera.lookAt(0, 0, 0);
+        if (shotPhase === 1) {
+          // Low-Angle Accretion Edge Shot
+          this.camera.position.set(Math.cos(elapsedTime * 0.15) * 14 + shakeX, -1.8 + shakeY, Math.sin(elapsedTime * 0.15) * 14);
+          this.camera.lookAt(0, 1.2, 0);
+        } else if (shotPhase === 2) {
+          // Top-Down Polar Survey
+          this.camera.position.set(shakeX, 32 + Math.sin(elapsedTime * 0.1) * 2, shakeY);
+          this.camera.lookAt(0, 0, 0);
+        } else if (shotPhase === 3) {
+          // Close-up Probe Tracking
+          const probe = this.actGroups[0].getObjectByName('singularityProbe');
+          if (probe) {
+            this.camera.position.set(probe.position.x + 3, probe.position.y + 1.5, probe.position.z + 4);
+            this.camera.lookAt(probe.position);
+          }
+        } else {
+          // Standard Cinematic Orbit
+          const camAngle = elapsedTime * 0.1;
+          const camR = 26 + Math.sin(elapsedTime * 0.15) * 4;
+          this.camera.position.x = Math.cos(camAngle) * camR + this.mouse.x * 2 + shakeX;
+          this.camera.position.z = Math.sin(camAngle) * camR + this.mouse.y * 2;
+          this.camera.position.y = 7 + Math.sin(elapsedTime * 0.2) * 3 + shakeY;
+          this.camera.lookAt(0, 0, 0);
+        }
       } else if (this.currentAct === 2) {
-        // Drone fly-through looking down city avenues
-        this.camera.position.x = Math.sin(elapsedTime * 0.15) * 20 + this.mouse.x * 4;
-        this.camera.position.y = 16 + Math.cos(elapsedTime * 0.2) * 4;
-        this.camera.position.z = 40 + Math.sin(elapsedTime * 0.1) * 8;
-        this.camera.lookAt(0, 0, -20);
+        if (shotPhase === 1) {
+          // Street-Level Looking Up At Skyscrapers
+          this.camera.position.set(shakeX, -17.5 + shakeY, 15);
+          this.camera.lookAt(0, 30, -30);
+        } else {
+          // Drone fly-through looking down city avenues
+          this.camera.position.x = Math.sin(elapsedTime * 0.15) * 20 + this.mouse.x * 4 + shakeX;
+          this.camera.position.y = 16 + Math.cos(elapsedTime * 0.2) * 4 + shakeY;
+          this.camera.position.z = 40 + Math.sin(elapsedTime * 0.1) * 8;
+          this.camera.lookAt(0, 0, -20);
+        }
       } else if (this.currentAct === 3) {
         // Spiral camera around quantum lattice
         const spiralAngle = elapsedTime * 0.25;
-        this.camera.position.x = Math.cos(spiralAngle) * 20;
+        this.camera.position.x = Math.cos(spiralAngle) * 20 + shakeX;
         this.camera.position.z = Math.sin(spiralAngle) * 20;
-        this.camera.position.y = Math.sin(elapsedTime * 0.5) * 6;
+        this.camera.position.y = Math.sin(elapsedTime * 0.5) * 6 + shakeY;
         this.camera.lookAt(0, 0, 0);
       } else if (this.currentAct === 4) {
         // Third-person chase cam behind ship with camera banking
-        this.camera.position.x = this.shipPos.x * 0.6;
-        this.camera.position.y = this.shipPos.y * 0.6 + 2.8;
+        this.camera.position.x = this.shipPos.x * 0.6 + shakeX;
+        this.camera.position.y = this.shipPos.y * 0.6 + 2.8 + shakeY;
         this.camera.position.z = 16;
         this.camera.lookAt(this.shipPos.x * 0.3, this.shipPos.y * 0.3, -40);
       } else if (this.currentAct === 5) {
         // Orbital survey camera
         const pAngle = elapsedTime * 0.12;
-        this.camera.position.x = Math.cos(pAngle) * 36 + this.mouse.x * 3;
+        this.camera.position.x = Math.cos(pAngle) * 36 + this.mouse.x * 3 + shakeX;
         this.camera.position.z = Math.sin(pAngle) * 36 + this.mouse.y * 3;
-        this.camera.position.y = 10 + Math.sin(elapsedTime * 0.3) * 4;
+        this.camera.position.y = 10 + Math.sin(elapsedTime * 0.3) * 4 + shakeY;
         this.camera.lookAt(0, 0, 0);
+      }
+    } else if (this.cameraMode === 'cockpit') {
+      if (this.currentAct === 4 && this.ship) {
+        // FPV Cockpit view inside ship
+        this.camera.position.set(this.shipPos.x, this.shipPos.y + 0.4, 6.2);
+        this.camera.lookAt(this.shipPos.x, this.shipPos.y, -80);
+      } else {
+        // First person forward look
+        this.camera.position.set(0, 1.2, 0);
+        this.camera.lookAt(0, 0, -50);
       }
     } else if (this.cameraMode === 'free') {
       this.controls.update();
