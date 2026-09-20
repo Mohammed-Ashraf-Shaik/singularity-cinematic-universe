@@ -1,0 +1,971 @@
+/* ==========================================================================
+   PROJECT AETHEL // THE SINGULARITY PROTOCOL
+   Scene Manager & 5 Cinematic Acts (Three.js 3D Engine)
+   ========================================================================== */
+
+class SceneManager {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.renderer = null;
+    this.scene = null;
+    this.camera = null;
+    this.controls = null;
+    this.clock = new THREE.Clock();
+
+    // Scene Acts
+    this.currentAct = 1;
+    this.actGroups = [];
+    this.isTransitioning = false;
+
+    // Director Camera Modes: 'director', 'fps', 'drone', 'free'
+    this.cameraMode = 'director';
+    this.cameraTarget = new THREE.Vector3(0, 0, 0);
+
+    // Flight Simulator State (Act IV)
+    this.ship = null;
+    this.shipPos = new THREE.Vector3(0, 0, 0);
+    this.shipRot = new THREE.Euler(0, 0, 0);
+    this.shipSpeed = 1.0;
+    this.warpRings = [];
+    this.ringScore = 0;
+    this.keys = {};
+
+    // Mouse tracking for camera parallax
+    this.mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+
+    this.init();
+  }
+
+  init() {
+    // 1. Renderer Setup
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas,
+      antialias: true,
+      powerPreference: 'high-performance',
+      alpha: false
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.25;
+
+    // 2. Scene & Base Camera
+    this.scene = new THREE.Scene();
+    this.scene.fog = new THREE.FogExp2(0x020308, 0.008);
+
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
+    this.camera.position.set(0, 8, 28);
+
+    // 3. OrbitControls for Free Mode
+    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+    this.controls.maxDistance = 120;
+    this.controls.minDistance = 4;
+    this.controls.enabled = false; // Disabled by default for director camera
+
+    // 4. Lights
+    const ambientLight = new THREE.AmbientLight(0x0a1020, 1.2);
+    this.scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0x70c0ff, 1.5);
+    dirLight.position.set(40, 60, 30);
+    this.scene.add(dirLight);
+
+    // 5. Build All 5 Cinematic Acts
+    this.buildAct1_Singularity();
+    this.buildAct2_Cyberpunk();
+    this.buildAct3_Quantum();
+    this.buildAct4_HyperspaceFlight();
+    this.buildAct5_MultiverseCodex();
+
+    // 6. Set Act 1 Active
+    this.setActiveAct(1, true);
+
+    // 7. Event Listeners
+    window.addEventListener('resize', () => this.onResize());
+    window.addEventListener('mousemove', (e) => this.onMouseMove(e));
+    window.addEventListener('keydown', (e) => this.onKeyDown(e));
+    window.addEventListener('keyup', (e) => this.onKeyUp(e));
+
+    console.log('🚀 [SceneManager] Initialized 5 Cinematic Acts.');
+  }
+
+  // ==========================================================================
+  // ACT I: GARGANTUA SINGULARITY (BLACK HOLE & GRAVITATIONAL LENSING)
+  // ==========================================================================
+  buildAct1_Singularity() {
+    const group = new THREE.Group();
+    group.name = 'Act1_Singularity';
+
+    // Deep Space Skybox Sphere
+    const skyGeo = new THREE.SphereGeometry(800, 32, 32);
+    const textureLoader = new THREE.TextureLoader();
+    const nebulaTex = textureLoader.load('assets/nebula.jpg');
+    nebulaTex.wrapS = THREE.RepeatWrapping;
+    nebulaTex.wrapT = THREE.RepeatWrapping;
+    nebulaTex.repeat.set(2, 1);
+    const skyMat = new THREE.MeshBasicMaterial({
+      map: nebulaTex,
+      side: THREE.BackSide
+    });
+    const skySphere = new THREE.Mesh(skyGeo, skyMat);
+    group.add(skySphere);
+
+    // 1. Black Hole Event Horizon (Absorbs All Light)
+    const eventHorizonGeo = new THREE.SphereGeometry(3.0, 64, 64);
+    const eventHorizonMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const eventHorizon = new THREE.Mesh(eventHorizonGeo, eventHorizonMat);
+    group.add(eventHorizon);
+
+    // 2. Primary Horizontal Accretion Disk
+    const accretionGeo = new THREE.RingGeometry(3.2, 14.0, 96, 16);
+    // Rotate to lie on XZ plane
+    accretionGeo.rotateX(-Math.PI / 2);
+    const accretionMat = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.BlackHoleAccretion.vertexShader,
+      fragmentShader: window.CustomShaders.BlackHoleAccretion.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.BlackHoleAccretion.uniforms),
+      transparent: true,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const accretionDisk = new THREE.Mesh(accretionGeo, accretionMat);
+    accretionDisk.name = 'accretionDisk';
+    group.add(accretionDisk);
+
+    // 3. Einstein Gravitational Lensing Ring (Vertical Arch)
+    const lensingGeo = new THREE.RingGeometry(3.1, 10.5, 96, 16);
+    const lensingMat = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.BlackHoleAccretion.vertexShader,
+      fragmentShader: window.CustomShaders.BlackHoleAccretion.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.BlackHoleAccretion.uniforms),
+      transparent: true,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const lensingRing = new THREE.Mesh(lensingGeo, lensingMat);
+    lensingRing.name = 'lensingRing';
+    lensingRing.rotation.y = Math.PI / 6;
+    group.add(lensingRing);
+
+    // 4. Inward-Spiraling Particle Field (Event Horizon Infall)
+    const particleCount = 4000;
+    const particleGeo = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const radii = new Float32Array(particleCount);
+    const angles = new Float32Array(particleCount);
+    const speeds = new Float32Array(particleCount);
+
+    const colorCore = new THREE.Color(0x00f0ff);
+    const colorOuter = new THREE.Color(0xff5500);
+
+    for (let i = 0; i < particleCount; i++) {
+      const r = 3.5 + Math.random() * 25.0;
+      const th = Math.random() * Math.PI * 2;
+      radii[i] = r;
+      angles[i] = th;
+      speeds[i] = (2.0 / Math.sqrt(r)) * (0.8 + Math.random() * 0.4);
+
+      positions[i * 3] = r * Math.cos(th);
+      positions[i * 3 + 1] = (Math.random() - 0.5) * (r * 0.12);
+      positions[i * 3 + 2] = r * Math.sin(th);
+
+      const mixedCol = colorCore.clone().lerp(colorOuter, Math.min(1, r / 20.0));
+      colors[i * 3] = mixedCol.r;
+      colors[i * 3 + 1] = mixedCol.g;
+      colors[i * 3 + 2] = mixedCol.b;
+    }
+
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particleGeo.userData = { radii, angles, speeds };
+
+    const particleMat = new THREE.PointsMaterial({
+      size: 0.22,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const particleSystem = new THREE.Points(particleGeo, particleMat);
+    particleSystem.name = 'singularityParticles';
+    group.add(particleSystem);
+
+    // 5. Orbiting Exploration Probe "ENDURANCE-01"
+    const probeGroup = new THREE.Group();
+    probeGroup.name = 'singularityProbe';
+    const probeBody = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3, 0.4, 1.2, 8),
+      new THREE.MeshStandardMaterial({ color: 0xd0d8e0, metalness: 0.9, roughness: 0.2 })
+    );
+    probeBody.rotation.z = Math.PI / 2;
+    probeGroup.add(probeBody);
+
+    const solarPanelMat = new THREE.MeshStandardMaterial({ color: 0x0055ff, metalness: 0.8, roughness: 0.3 });
+    const solarWing1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.6, 2.4), solarPanelMat);
+    solarWing1.position.x = 0.5;
+    probeGroup.add(solarWing1);
+    const solarWing2 = solarWing1.clone();
+    solarWing2.position.x = -0.5;
+    probeGroup.add(solarWing2);
+
+    const beaconLight = new THREE.PointLight(0x00f0ff, 2, 8);
+    beaconLight.position.set(0, 0.6, 0);
+    probeGroup.add(beaconLight);
+
+    group.add(probeGroup);
+
+    this.scene.add(group);
+    this.actGroups[0] = group;
+  }
+
+  // ==========================================================================
+  // ACT II: NEO-BABYLON CYBER MEGALOPOLIS
+  // ==========================================================================
+  buildAct2_Cyberpunk() {
+    const group = new THREE.Group();
+    group.name = 'Act2_Cyberpunk';
+
+    // Backdrop Skybox
+    const cyberSkyGeo = new THREE.SphereGeometry(800, 32, 32);
+    const textureLoader = new THREE.TextureLoader();
+    const cyberTex = textureLoader.load('assets/cyberpunk.jpg');
+    cyberTex.wrapS = THREE.RepeatWrapping;
+    cyberTex.repeat.set(2, 1);
+    const cyberSkyMat = new THREE.MeshBasicMaterial({
+      map: cyberTex,
+      side: THREE.BackSide
+    });
+    group.add(new THREE.Mesh(cyberSkyGeo, cyberSkyMat));
+
+    // 1. Procedural Monolith Skyscrapers
+    const buildingGeo = new THREE.BoxGeometry(1, 1, 1);
+    const buildingMat = new THREE.MeshStandardMaterial({
+      color: 0x060914,
+      metalness: 0.9,
+      roughness: 0.2
+    });
+
+    const neonPalette = [0x00f0ff, 0xb026ff, 0xff0055, 0xffaa00, 0x00ff88];
+    const citySize = 14;
+    const buildingCount = citySize * citySize;
+
+    const buildingMesh = new THREE.InstancedMesh(buildingGeo, buildingMat, buildingCount);
+    const dummy = new THREE.Object3D();
+
+    let idx = 0;
+    for (let x = -citySize / 2; x < citySize / 2; x++) {
+      for (let z = -citySize / 2; z < citySize / 2; z++) {
+        // Leave central canal empty
+        if (Math.abs(x) < 1.5) continue;
+
+        const height = 15 + Math.random() * 65;
+        dummy.position.set(x * 9 + (Math.random() - 0.5) * 2, height / 2 - 20, z * 9 + (Math.random() - 0.5) * 2);
+        dummy.scale.set(6 + Math.random() * 2, height, 6 + Math.random() * 2);
+        dummy.updateMatrix();
+        buildingMesh.setMatrixAt(idx++, dummy.matrix);
+      }
+    }
+    buildingMesh.instanceMatrix.needsUpdate = true;
+    group.add(buildingMesh);
+
+    // 2. Holographic Neon Advertising Beacons
+    for (let i = 0; i < 16; i++) {
+      const col = neonPalette[i % neonPalette.length];
+      const signGeo = new THREE.PlaneGeometry(12, 5);
+      const signMat = new THREE.MeshBasicMaterial({
+        color: col,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85
+      });
+      const sign = new THREE.Mesh(signGeo, signMat);
+      sign.position.set(
+        (Math.random() - 0.5) * 70,
+        10 + Math.random() * 35,
+        (Math.random() - 0.5) * 70
+      );
+      sign.rotation.y = Math.random() * Math.PI;
+      group.add(sign);
+
+      const signGlow = new THREE.PointLight(col, 2.5, 25);
+      signGlow.position.copy(sign.position);
+      group.add(signGlow);
+    }
+
+    // 3. Flying Hover Cars / Spinners Traffic
+    const trafficCount = 70;
+    const trafficGroup = new THREE.Group();
+    trafficGroup.name = 'cyberTraffic';
+    const carGeo = new THREE.BoxGeometry(0.8, 0.3, 2.2);
+
+    for (let i = 0; i < trafficCount; i++) {
+      const isRed = Math.random() > 0.5;
+      const carMat = new THREE.MeshBasicMaterial({ color: isRed ? 0xff0044 : 0x00f0ff });
+      const car = new THREE.Mesh(carGeo, carMat);
+      car.position.set(
+        (Math.random() - 0.5) * 80,
+        5 + Math.random() * 35,
+        (Math.random() - 0.5) * 120
+      );
+      car.userData = {
+        speed: (0.4 + Math.random() * 0.6) * (Math.random() > 0.5 ? 1 : -1),
+        laneZ: car.position.z
+      };
+      trafficGroup.add(car);
+    }
+    group.add(trafficGroup);
+
+    // 4. Cybernetic Volumetric Rain Particles
+    const rainCount = 3000;
+    const rainGeo = new THREE.BufferGeometry();
+    const rainPositions = new Float32Array(rainCount * 3);
+    for (let i = 0; i < rainCount; i++) {
+      rainPositions[i * 3] = (Math.random() - 0.5) * 120;
+      rainPositions[i * 3 + 1] = Math.random() * 80 - 10;
+      rainPositions[i * 3 + 2] = (Math.random() - 0.5) * 120;
+    }
+    rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
+    const rainMat = new THREE.PointsMaterial({
+      color: 0x70d8ff,
+      size: 0.35,
+      transparent: true,
+      opacity: 0.5
+    });
+    const rainParticles = new THREE.Points(rainGeo, rainMat);
+    rainParticles.name = 'cyberRain';
+    group.add(rainParticles);
+
+    // 5. Reflective Wet Grid Floor
+    const gridHelper = new THREE.GridHelper(160, 60, 0x00f0ff, 0x1a243a);
+    gridHelper.position.y = -19.9;
+    group.add(gridHelper);
+
+    this.scene.add(group);
+    this.actGroups[1] = group;
+  }
+
+  // ==========================================================================
+  // ACT III: THE QUANTUM CORE (CALABI-YAU LATTICE & ATOMIC ORBITALS)
+  // ==========================================================================
+  buildAct3_Quantum() {
+    const group = new THREE.Group();
+    group.name = 'Act3_Quantum';
+
+    // 1. Calabi-Yau Mathematical Lattice Mesh
+    const torusKnotGeo = new THREE.TorusKnotGeometry(7, 2.2, 160, 32, 3, 5);
+    const quantumMat = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.QuantumLattice.vertexShader,
+      fragmentShader: window.CustomShaders.QuantumLattice.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.QuantumLattice.uniforms),
+      transparent: true,
+      wireframe: true
+    });
+    const quantumCore = new THREE.Mesh(torusKnotGeo, quantumMat);
+    quantumCore.name = 'quantumCoreMesh';
+    group.add(quantumCore);
+
+    // 2. Inner Glowing Singularity Seed
+    const seedGeo = new THREE.IcosahedronGeometry(2.5, 4);
+    const seedMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00d0ff,
+      emissiveIntensity: 2.0,
+      roughness: 0.1,
+      metalness: 0.9
+    });
+    const seed = new THREE.Mesh(seedGeo, seedMat);
+    seed.name = 'quantumSeed';
+    group.add(seed);
+
+    // 3. Nested Quantum Magnetic Orbital Rings
+    const ringGroup = new THREE.Group();
+    ringGroup.name = 'quantumRings';
+    for (let i = 0; i < 6; i++) {
+      const ringRadius = 10 + i * 2.2;
+      const ringGeo = new THREE.TorusGeometry(ringRadius, 0.08, 16, 100);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: i % 2 === 0 ? 0x00f0ff : 0xb026ff,
+        transparent: true,
+        opacity: 0.75
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.random() * Math.PI;
+      ring.rotation.y = Math.random() * Math.PI;
+      ring.userData = {
+        rotSpeedX: (Math.random() - 0.5) * 0.02,
+        rotSpeedY: (Math.random() - 0.5) * 0.02
+      };
+      ringGroup.add(ring);
+    }
+    group.add(ringGroup);
+
+    // 4. Reactive Quantum Energy Sparks
+    const sparkCount = 2000;
+    const sparkGeo = new THREE.BufferGeometry();
+    const sparkPositions = new Float32Array(sparkCount * 3);
+    for (let i = 0; i < sparkCount; i++) {
+      const u = Math.random();
+      const v = Math.random();
+      const theta = u * 2.0 * Math.PI;
+      const phi = Math.acos(2.0 * v - 1.0);
+      const r = Math.cbrt(Math.random()) * 26;
+      sparkPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      sparkPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      sparkPositions[i * 3 + 2] = r * Math.cos(phi);
+    }
+    sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPositions, 3));
+    const sparkMat = new THREE.PointsMaterial({
+      color: 0x00ffff,
+      size: 0.28,
+      transparent: true,
+      blending: THREE.AdditiveBlending
+    });
+    const sparkField = new THREE.Points(sparkGeo, sparkMat);
+    sparkField.name = 'quantumSparks';
+    group.add(sparkField);
+
+    this.scene.add(group);
+    this.actGroups[2] = group;
+  }
+
+  // ==========================================================================
+  // ACT IV: HYPERSPACE WARP RUNNER (INTERACTIVE FLIGHT SIMULATOR)
+  // ==========================================================================
+  buildAct4_HyperspaceFlight() {
+    const group = new THREE.Group();
+    group.name = 'Act4_HyperspaceFlight';
+
+    // 1. Procedural Warp Tunnel Cylinder
+    const tunnelGeo = new THREE.CylinderGeometry(14, 14, 400, 32, 64, true);
+    tunnelGeo.rotateX(Math.PI / 2); // Align with Z-axis
+    const tunnelMat = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.HyperspaceTunnel.vertexShader,
+      fragmentShader: window.CustomShaders.HyperspaceTunnel.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.HyperspaceTunnel.uniforms),
+      side: THREE.BackSide,
+      transparent: true
+    });
+    const tunnel = new THREE.Mesh(tunnelGeo, tunnelMat);
+    tunnel.name = 'warpTunnelMesh';
+    group.add(tunnel);
+
+    // 2. Passing Holographic Acceleration Rings
+    this.warpRings = [];
+    const ringGeo = new THREE.TorusGeometry(8, 0.25, 16, 48);
+    for (let i = 0; i < 15; i++) {
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: i % 2 === 0 ? 0x00f0ff : 0xff0055,
+        transparent: true,
+        opacity: 0.9
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.z = -i * 26;
+      group.add(ring);
+      this.warpRings.push(ring);
+    }
+
+    // 3. User's Interceptor Spacecraft Model
+    const shipGroup = new THREE.Group();
+    shipGroup.name = 'playerShip';
+
+    // Main fuselage
+    const bodyGeo = new THREE.ConeGeometry(0.8, 3.2, 5);
+    bodyGeo.rotateX(-Math.PI / 2);
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x111622,
+      metalness: 0.9,
+      roughness: 0.2
+    });
+    const fuselage = new THREE.Mesh(bodyGeo, bodyMat);
+    shipGroup.add(fuselage);
+
+    // Swept delta wings
+    const wingGeo = new THREE.BoxGeometry(4.2, 0.08, 1.4);
+    const wingMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      metalness: 0.8,
+      emissive: 0x005577,
+      emissiveIntensity: 0.4
+    });
+    const wings = new THREE.Mesh(wingGeo, wingMat);
+    wings.position.set(0, 0, 0.6);
+    shipGroup.add(wings);
+
+    // Twin Plasma Thrusters
+    const thrusterMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+    const thruster1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.05, 0.8, 8), thrusterMat);
+    thruster1.rotateX(Math.PI / 2);
+    thruster1.position.set(0.6, 0, 1.6);
+    shipGroup.add(thruster1);
+
+    const thruster2 = thruster1.clone();
+    thruster2.position.set(-0.6, 0, 1.6);
+    shipGroup.add(thruster2);
+
+    shipGroup.position.set(0, 0, 8);
+    group.add(shipGroup);
+    this.ship = shipGroup;
+
+    // 4. Warp Speed Particle Streaks
+    const streakCount = 1500;
+    const streakGeo = new THREE.BufferGeometry();
+    const streakPositions = new Float32Array(streakCount * 3);
+    for (let i = 0; i < streakCount; i++) {
+      streakPositions[i * 3] = (Math.random() - 0.5) * 22;
+      streakPositions[i * 3 + 1] = (Math.random() - 0.5) * 22;
+      streakPositions[i * 3 + 2] = (Math.random() - 0.5) * 350;
+    }
+    streakGeo.setAttribute('position', new THREE.BufferAttribute(streakPositions, 3));
+    const streakMat = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.35,
+      transparent: true,
+      blending: THREE.AdditiveBlending
+    });
+    const streakField = new THREE.Points(streakGeo, streakMat);
+    streakField.name = 'warpStreaks';
+    group.add(streakField);
+
+    this.scene.add(group);
+    this.actGroups[3] = group;
+  }
+
+  // ==========================================================================
+  // ACT V: THE MULTIVERSE CODEX (INTERACTIVE EXOPLANET & STELLAR SCANNER)
+  // ==========================================================================
+  buildAct5_MultiverseCodex() {
+    const group = new THREE.Group();
+    group.name = 'Act5_MultiverseCodex';
+
+    // Skybox with Nebula
+    const exoSkyGeo = new THREE.SphereGeometry(800, 32, 32);
+    const textureLoader = new THREE.TextureLoader();
+    const nebulaTex = textureLoader.load('assets/nebula.jpg');
+    nebulaTex.wrapS = THREE.RepeatWrapping;
+    nebulaTex.repeat.set(2, 1);
+    group.add(new THREE.Mesh(exoSkyGeo, new THREE.MeshBasicMaterial({ map: nebulaTex, side: THREE.BackSide })));
+
+    // 1. The Alien Exoplanet "AETHEL-PRIME"
+    const planetGeo = new THREE.SphereGeometry(9, 64, 64);
+    const planetTex = textureLoader.load('assets/exoplanet.jpg');
+    const planetMat = new THREE.MeshStandardMaterial({
+      map: planetTex,
+      roughness: 0.6,
+      metalness: 0.1
+    });
+    const planet = new THREE.Mesh(planetGeo, planetMat);
+    planet.name = 'exoplanetMesh';
+    group.add(planet);
+
+    // 2. Atmospheric Glow Fresnel Atmosphere
+    const atmoGeo = new THREE.SphereGeometry(9.3, 64, 64);
+    const atmoMat = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      transparent: true,
+      opacity: 0.25,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide
+    });
+    const atmosphere = new THREE.Mesh(atmoGeo, atmoMat);
+    group.add(atmosphere);
+
+    // 3. Planetary Dust Rings
+    const ringsGeo = new THREE.RingGeometry(12.5, 22.0, 64);
+    ringsGeo.rotateX(Math.PI / 2.3);
+    const ringsMat = new THREE.MeshStandardMaterial({
+      color: 0x88ccff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.75,
+      metalness: 0.4
+    });
+    const rings = new THREE.Mesh(ringsGeo, ringsMat);
+    group.add(rings);
+
+    // 4. Interactive Holographic Scanner Nodes (Satellites)
+    const nodeGroup = new THREE.Group();
+    nodeGroup.name = 'codexNodes';
+    this.codexNodes = [];
+
+    const nodeData = [
+      { name: 'Atmospheric Scanner Alpha', category: 'Composition: 72% N2, 21% O2, 4% Xenon', r: 16, speed: 0.3 },
+      { name: 'Quantum Relic Beacon', category: 'Origin: Pre-Singularity Civilization', r: 19, speed: -0.25 },
+      { name: 'Orbital Defense Grid', category: 'Shield Status: 100% Active', r: 23, speed: 0.18 }
+    ];
+
+    nodeData.forEach((data, idx) => {
+      const nodeMesh = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.8),
+        new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true })
+      );
+      nodeMesh.userData = data;
+
+      const aura = new THREE.PointLight(0x00f0ff, 1.5, 8);
+      nodeMesh.add(aura);
+
+      nodeGroup.add(nodeMesh);
+      this.codexNodes.push(nodeMesh);
+    });
+    group.add(nodeGroup);
+
+    this.scene.add(group);
+    this.actGroups[4] = group;
+  }
+
+  // ==========================================================================
+  // SCENE TRANSITIONS & ACT SWITCHING
+  // ==========================================================================
+  setActiveAct(actNumber, instant = false) {
+    if (this.currentAct === actNumber && !instant) return;
+    this.currentAct = actNumber;
+
+    if (!instant) {
+      // Trigger Hyperspace Flash & Sound
+      this.triggerWarpFlash();
+      if (window.audioEngine) {
+        window.audioEngine.playWarpJump();
+      }
+    }
+
+    // Toggle group visibilities
+    this.actGroups.forEach((group, idx) => {
+      if (group) {
+        group.visible = (idx + 1 === actNumber);
+      }
+    });
+
+    // Reset camera position per act defaults
+    if (actNumber === 1) {
+      this.camera.position.set(0, 7, 26);
+      this.cameraTarget.set(0, 0, 0);
+    } else if (actNumber === 2) {
+      this.camera.position.set(0, 18, 45);
+      this.cameraTarget.set(0, 0, -20);
+    } else if (actNumber === 3) {
+      this.camera.position.set(0, 0, 22);
+      this.cameraTarget.set(0, 0, 0);
+    } else if (actNumber === 4) {
+      this.camera.position.set(0, 2.5, 14);
+      this.cameraTarget.set(0, 0, -50);
+    } else if (actNumber === 5) {
+      this.camera.position.set(0, 10, 36);
+      this.cameraTarget.set(0, 0, 0);
+    }
+
+    // Voice commentary
+    if (window.voiceNarrator) {
+      const commentaries = {
+        1: "Act One: Gargantua Event Horizon. Accretion temperature 10 million Kelvin. Time dilation factor critical.",
+        2: "Act Two: Sector Seven, Neo-Babylon. Atmospheric moisture 84 percent. Neural traffic online.",
+        3: "Act Three: The Quantum Core. Calabi-Yau multi-dimensional manifold stabilized.",
+        4: "Act Four: Hyperspace Flight Simulator engaged. Use WASD or arrows to navigate warp acceleration rings.",
+        5: "Act Five: Multiverse Codex archive unlocked. Scanning planetary frequency and orbital beacons."
+      };
+      window.voiceNarrator.speak(commentaries[actNumber], true);
+    }
+  }
+
+  triggerWarpFlash() {
+    const flash = document.getElementById('hyperspace-flash');
+    if (flash) {
+      flash.style.opacity = '1';
+      setTimeout(() => {
+        flash.style.opacity = '0';
+      }, 300);
+    }
+  }
+
+  setCameraMode(mode) {
+    this.cameraMode = mode;
+    if (mode === 'free') {
+      this.controls.enabled = true;
+    } else {
+      this.controls.enabled = false;
+    }
+  }
+
+  // ==========================================================================
+  // INPUT HANDLERS
+  // ==========================================================================
+  onResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  onMouseMove(e) {
+    this.mouse.targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+    this.mouse.targetY = (e.clientY / window.innerHeight - 0.5) * 2;
+  }
+
+  onKeyDown(e) {
+    this.keys[e.key.toLowerCase()] = true;
+  }
+
+  onKeyUp(e) {
+    this.keys[e.key.toLowerCase()] = false;
+  }
+
+  // ==========================================================================
+  // ANIMATION & RENDER LOOP
+  // ==========================================================================
+  update() {
+    const delta = this.clock.getDelta();
+    const elapsedTime = this.clock.getElapsedTime();
+
+    // Smooth mouse lerp
+    this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
+    this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
+
+    // Get real-time audio intensity
+    let audioIntensity = 0.0;
+    if (window.audioEngine) {
+      const freqData = window.audioEngine.getFrequencyData();
+      if (freqData) {
+        let sum = 0;
+        for (let i = 0; i < 16; i++) sum += freqData[i];
+        audioIntensity = sum / (16 * 255);
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // ACT 1 UPDATE: SINGULARITY
+    // ------------------------------------------------------------------------
+    if (this.currentAct === 1) {
+      const g = this.actGroups[0];
+      const accretion = g.getObjectByName('accretionDisk');
+      if (accretion) {
+        accretion.material.uniforms.time.value = elapsedTime;
+        accretion.material.uniforms.audioIntensity.value = audioIntensity;
+      }
+      const lensing = g.getObjectByName('lensingRing');
+      if (lensing) {
+        lensing.material.uniforms.time.value = elapsedTime;
+        lensing.material.uniforms.audioIntensity.value = audioIntensity;
+        lensing.rotation.z = Math.sin(elapsedTime * 0.2) * 0.15;
+      }
+
+      // Update Inward Spiraling Particles
+      const particles = g.getObjectByName('singularityParticles');
+      if (particles) {
+        const posAttr = particles.geometry.attributes.position;
+        const { radii, angles, speeds } = particles.geometry.userData;
+        for (let i = 0; i < radii.length; i++) {
+          angles[i] += speeds[i] * delta * 1.8;
+          radii[i] -= (0.4 + speeds[i] * 0.2) * delta;
+          if (radii[i] < 3.2) {
+            radii[i] = 22.0 + Math.random() * 4.0;
+          }
+          posAttr.array[i * 3] = radii[i] * Math.cos(angles[i]);
+          posAttr.array[i * 3 + 2] = radii[i] * Math.sin(angles[i]);
+        }
+        posAttr.needsUpdate = true;
+      }
+
+      // Orbiting Probe
+      const probe = g.getObjectByName('singularityProbe');
+      if (probe) {
+        const probeAngle = elapsedTime * 0.4;
+        const probeR = 17.0;
+        probe.position.set(probeR * Math.cos(probeAngle), Math.sin(probeAngle * 2) * 2.5, probeR * Math.sin(probeAngle));
+        probe.rotation.y = -probeAngle + Math.PI / 2;
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // ACT 2 UPDATE: CYBERPUNK
+    // ------------------------------------------------------------------------
+    else if (this.currentAct === 2) {
+      const g = this.actGroups[1];
+      const traffic = g.getObjectByName('cyberTraffic');
+      if (traffic) {
+        traffic.children.forEach(car => {
+          car.position.z += car.userData.speed * delta * 35;
+          if (car.position.z > 60) car.position.z = -60;
+          if (car.position.z < -60) car.position.z = 60;
+        });
+      }
+
+      // Rain Particles
+      const rain = g.getObjectByName('cyberRain');
+      if (rain) {
+        const posAttr = rain.geometry.attributes.position;
+        for (let i = 1; i < posAttr.array.length; i += 3) {
+          posAttr.array[i] -= 45 * delta;
+          if (posAttr.array[i] < -20) {
+            posAttr.array[i] = 60;
+          }
+        }
+        posAttr.needsUpdate = true;
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // ACT 3 UPDATE: QUANTUM CORE
+    // ------------------------------------------------------------------------
+    else if (this.currentAct === 3) {
+      const g = this.actGroups[2];
+      const core = g.getObjectByName('quantumCoreMesh');
+      if (core) {
+        core.material.uniforms.time.value = elapsedTime;
+        core.material.uniforms.audioFreq.value = audioIntensity;
+        core.rotation.x = elapsedTime * 0.2;
+        core.rotation.y = elapsedTime * 0.3;
+      }
+
+      const seed = g.getObjectByName('quantumSeed');
+      if (seed) {
+        const pulse = 1.0 + Math.sin(elapsedTime * 4.0) * 0.15 + audioIntensity * 0.4;
+        seed.scale.set(pulse, pulse, pulse);
+        seed.rotation.y = -elapsedTime * 0.5;
+      }
+
+      const rings = g.getObjectByName('quantumRings');
+      if (rings) {
+        rings.children.forEach(ring => {
+          ring.rotation.x += ring.userData.rotSpeedX;
+          ring.rotation.y += ring.userData.rotSpeedY;
+        });
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // ACT 4 UPDATE: HYPERSPACE FLIGHT SIMULATOR
+    // ------------------------------------------------------------------------
+    else if (this.currentAct === 4) {
+      const g = this.actGroups[3];
+      const tunnel = g.getObjectByName('warpTunnelMesh');
+      if (tunnel) {
+        tunnel.material.uniforms.time.value = elapsedTime;
+      }
+
+      // Interactive Ship Steering
+      const steerSpeed = 22.0 * delta;
+      let targetX = this.shipPos.x;
+      let targetY = this.shipPos.y;
+
+      if (this.keys['arrowleft'] || this.keys['a']) targetX -= steerSpeed;
+      if (this.keys['arrowright'] || this.keys['d']) targetX += steerSpeed;
+      if (this.keys['arrowup'] || this.keys['w']) targetY += steerSpeed;
+      if (this.keys['arrowdown'] || this.keys['s']) targetY -= steerSpeed;
+
+      // Mouse flight tracking when no keys pressed
+      if (!this.keys['a'] && !this.keys['d'] && !this.keys['w'] && !this.keys['s']) {
+        targetX += (this.mouse.x * 6 - targetX) * 0.05;
+        targetY += (-this.mouse.y * 5 - targetY) * 0.05;
+      }
+
+      // Clamp within tunnel radius
+      targetX = Math.max(-7.0, Math.min(7.0, targetX));
+      targetY = Math.max(-5.0, Math.min(5.0, targetY));
+
+      this.shipPos.x = targetX;
+      this.shipPos.y = targetY;
+
+      if (this.ship) {
+        this.ship.position.x = this.shipPos.x;
+        this.ship.position.y = this.shipPos.y;
+        // Roll into turns
+        this.ship.rotation.z = -this.shipPos.x * 0.12;
+        this.ship.rotation.x = this.shipPos.y * 0.08;
+      }
+
+      // Check Hyperspace Rings passing ship
+      const isBoosting = !!this.keys[' '];
+      const speed = isBoosting ? 65.0 : 35.0;
+
+      if (window.audioEngine) {
+        window.audioEngine.updateThrusterSound(isBoosting ? 1.0 : 0.6, isBoosting);
+      }
+
+      this.warpRings.forEach(ring => {
+        ring.position.z += speed * delta;
+        if (ring.position.z > 15) {
+          ring.position.z = -280;
+          // Collision check: Did the ship fly through the ring?
+          const dist = Math.hypot(this.shipPos.x - ring.position.x, this.shipPos.y - ring.position.y);
+          if (dist < 8.0) {
+            this.ringScore += 100;
+            if (window.audioEngine) window.audioEngine.playHoloBeep(1200, 'sine');
+          }
+        }
+      });
+    }
+
+    // ------------------------------------------------------------------------
+    // ACT 5 UPDATE: MULTIVERSE CODEX
+    // ------------------------------------------------------------------------
+    else if (this.currentAct === 5) {
+      const g = this.actGroups[4];
+      const planet = g.getObjectByName('exoplanetMesh');
+      if (planet) {
+        planet.rotation.y = elapsedTime * 0.08;
+      }
+
+      // Update Codex Scanner Nodes
+      if (this.codexNodes) {
+        this.codexNodes.forEach(node => {
+          const angle = elapsedTime * node.userData.speed;
+          node.position.x = Math.cos(angle) * node.userData.r;
+          node.position.z = Math.sin(angle) * node.userData.r;
+          node.position.y = Math.sin(angle * 2) * 2;
+          node.rotation.x += 0.02;
+          node.rotation.y += 0.03;
+        });
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // CAMERA CHOREOGRAPHY
+    // ------------------------------------------------------------------------
+    if (this.cameraMode === 'director') {
+      if (this.currentAct === 1) {
+        // Slow cinematic orbit around black hole
+        const camAngle = elapsedTime * 0.1;
+        const camR = 26 + Math.sin(elapsedTime * 0.15) * 4;
+        this.camera.position.x = Math.cos(camAngle) * camR + this.mouse.x * 2;
+        this.camera.position.z = Math.sin(camAngle) * camR + this.mouse.y * 2;
+        this.camera.position.y = 7 + Math.sin(elapsedTime * 0.2) * 3;
+        this.camera.lookAt(0, 0, 0);
+      } else if (this.currentAct === 2) {
+        // Drone fly-through looking down city avenues
+        this.camera.position.x = Math.sin(elapsedTime * 0.15) * 20 + this.mouse.x * 4;
+        this.camera.position.y = 16 + Math.cos(elapsedTime * 0.2) * 4;
+        this.camera.position.z = 40 + Math.sin(elapsedTime * 0.1) * 8;
+        this.camera.lookAt(0, 0, -20);
+      } else if (this.currentAct === 3) {
+        // Spiral camera around quantum lattice
+        const spiralAngle = elapsedTime * 0.25;
+        this.camera.position.x = Math.cos(spiralAngle) * 20;
+        this.camera.position.z = Math.sin(spiralAngle) * 20;
+        this.camera.position.y = Math.sin(elapsedTime * 0.5) * 6;
+        this.camera.lookAt(0, 0, 0);
+      } else if (this.currentAct === 4) {
+        // Third-person chase cam behind ship with camera banking
+        this.camera.position.x = this.shipPos.x * 0.6;
+        this.camera.position.y = this.shipPos.y * 0.6 + 2.8;
+        this.camera.position.z = 16;
+        this.camera.lookAt(this.shipPos.x * 0.3, this.shipPos.y * 0.3, -40);
+      } else if (this.currentAct === 5) {
+        // Orbital survey camera
+        const pAngle = elapsedTime * 0.12;
+        this.camera.position.x = Math.cos(pAngle) * 36 + this.mouse.x * 3;
+        this.camera.position.z = Math.sin(pAngle) * 36 + this.mouse.y * 3;
+        this.camera.position.y = 10 + Math.sin(elapsedTime * 0.3) * 4;
+        this.camera.lookAt(0, 0, 0);
+      }
+    } else if (this.cameraMode === 'free') {
+      this.controls.update();
+    }
+
+    // Render Scene
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+
+window.SceneManager = SceneManager;
