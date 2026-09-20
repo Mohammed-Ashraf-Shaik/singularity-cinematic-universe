@@ -65,12 +65,12 @@ class SceneManager {
     this.controls.enabled = false; // Disabled by default for director camera
 
     // 4. Lights
-    const ambientLight = new THREE.AmbientLight(0x0a1020, 1.2);
-    this.scene.add(ambientLight);
+    this.ambientLight = new THREE.AmbientLight(0x0a1020, 1.2);
+    this.scene.add(this.ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0x70c0ff, 1.5);
-    dirLight.position.set(40, 60, 30);
-    this.scene.add(dirLight);
+    this.dirLight = new THREE.DirectionalLight(0x70c0ff, 1.5);
+    this.dirLight.position.set(40, 60, 30);
+    this.scene.add(this.dirLight);
 
     // 5. Build All 7 Cinematic Acts
     this.buildAct1_Singularity();
@@ -961,6 +961,32 @@ class SceneManager {
       this.controls.enabled = true;
     } else {
       this.controls.enabled = false;
+    }
+  }
+
+  setLightingPreset(mode) {
+    if (!this.ambientLight || !this.dirLight) return;
+    switch (mode.toLowerCase()) {
+      case 'void':
+        this.ambientLight.color.setHex(0x0a1020);
+        this.dirLight.color.setHex(0x70c0ff);
+        this.renderer.toneMappingExposure = 1.25;
+        break;
+      case 'eclipse':
+        this.ambientLight.color.setHex(0x200804);
+        this.dirLight.color.setHex(0xff5500);
+        this.renderer.toneMappingExposure = 1.4;
+        break;
+      case 'neon':
+        this.ambientLight.color.setHex(0x180424);
+        this.dirLight.color.setHex(0xb026ff);
+        this.renderer.toneMappingExposure = 1.45;
+        break;
+      case 'supernova':
+        this.ambientLight.color.setHex(0x203040);
+        this.dirLight.color.setHex(0xffffff);
+        this.renderer.toneMappingExposure = 1.9;
+        break;
     }
   }
 

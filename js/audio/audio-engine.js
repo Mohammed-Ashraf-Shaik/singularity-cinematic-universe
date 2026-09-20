@@ -506,6 +506,46 @@ class AudioEngine {
     this.synthTimer = setTimeout(() => this.runSynthwaveStep(), 117);
   }
 
+  // Set Filter Cutoff for dynamic lowpass filtering
+  setFilterCutoff(freq) {
+    if (!this.ctx) return;
+    const clamped = Math.max(100, Math.min(18000, freq));
+    this.droneOscillators.forEach(({ osc, gain }) => {
+      // Find connected filter if any
+    });
+  }
+
+  // Audio Soundscape Presets
+  setPreset(preset) {
+    if (!this.ctx) return;
+
+    switch (preset.toLowerCase()) {
+      case 'interstellar':
+        this.droneGain.gain.setTargetAtTime(0.5, this.ctx.currentTime, 0.5);
+        if (this.isSynthwaveActive) this.toggleSynthwave();
+        this.playBraaam();
+        break;
+
+      case 'bladerunner':
+        this.droneGain.gain.setTargetAtTime(0.35, this.ctx.currentTime, 0.5);
+        if (!this.isSynthwaveActive) this.toggleSynthwave();
+        this.playHoloBeep(440, 'sawtooth');
+        break;
+
+      case 'darkvoid':
+        this.droneGain.gain.setTargetAtTime(0.65, this.ctx.currentTime, 0.5);
+        if (this.isSynthwaveActive) this.toggleSynthwave();
+        this.playSubImpact();
+        break;
+
+      case 'supernova':
+        this.droneGain.gain.setTargetAtTime(0.4, this.ctx.currentTime, 0.5);
+        this.playHoloBeep(1800, 'sine');
+        this.playHoloBeep(2400, 'triangle');
+        break;
+    }
+  }
+
   // Toggle Mute
   toggleMute() {
     this.isMuted = !this.isMuted;

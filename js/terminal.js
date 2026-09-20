@@ -98,6 +98,8 @@ class HoloTerminal {
         this.printLine("  stargate         : Jump to The Tachyon Stargate Event Horizon (Act 7)", "cyan");
         this.printLine("  fire             : Discharge dual plasma photon cannons (Act 4)", "cyan");
         this.printLine("  synthwave        : Toggle 128 BPM cyberpunk procedural sequencer", "cyan");
+        this.printLine("  preset <name>    : Soundscape preset ('interstellar', 'bladerunner', 'darkvoid', 'supernova')", "cyan");
+        this.printLine("  light <mode>     : Lighting mode ('void', 'eclipse', 'neon', 'supernova')", "cyan");
         this.printLine("  braaam           : Synthesize Hans Zimmer cinematic horn blast", "cyan");
         this.printLine("  camera <mode>    : Switch camera ('director', 'trailer', 'cockpit', 'free')", "cyan");
         this.printLine("  status           : Display vessel telemetry & shield integrity", "cyan");
@@ -106,6 +108,25 @@ class HoloTerminal {
         this.printLine("  matrix           : Decrypt quantum matrix transmission", "cyan");
         this.printLine("  lore             : Read Project Aethel historical logbook", "cyan");
         this.printLine("  clear            : Clear screen buffer", "cyan");
+        break;
+
+      case 'light':
+      case 'lighting':
+        if (['void', 'eclipse', 'neon', 'supernova'].includes(arg)) {
+          this.sm.setLightingPreset(arg);
+          this.printLine(`Atmospheric lighting recalibrated to: ${arg.toUpperCase()}`, "success");
+        } else {
+          this.printLine("Usage: light void | eclipse | neon | supernova", "error");
+        }
+        break;
+
+      case 'preset':
+        if (['interstellar', 'bladerunner', 'darkvoid', 'supernova'].includes(arg) && window.audioEngine) {
+          window.audioEngine.setPreset(arg);
+          this.printLine(`Audio soundscape preset activated: ${arg.toUpperCase()}`, "success");
+        } else {
+          this.printLine("Usage: preset interstellar | bladerunner | darkvoid | supernova", "error");
+        }
         break;
 
       case 'warp':
