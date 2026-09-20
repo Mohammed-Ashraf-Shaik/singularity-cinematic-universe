@@ -107,7 +107,20 @@ class HUDManager {
       });
     }
 
-    // 8. Codex Close Button
+    // 8. Synthwave Beat Toggle Button
+    const synthBtn = document.getElementById('synthwave-btn');
+    if (synthBtn) {
+      synthBtn.addEventListener('click', () => {
+        if (window.audioEngine) {
+          const active = window.audioEngine.toggleSynthwave();
+          synthBtn.classList.toggle('active', active);
+          synthBtn.textContent = active ? 'SYNTH: ON' : 'SYNTH [S]';
+          if (active) this.terminal.printLine("CYBERPUNK SYNTHWAVE SEQUENCER: ENGAGED [128 BPM]", "success");
+        }
+      });
+    }
+
+    // 9. Codex Close Button
     const codexClose = document.getElementById('codex-close-btn');
     if (codexClose && this.codexModal) {
       codexClose.addEventListener('click', () => {
@@ -115,7 +128,7 @@ class HUDManager {
       });
     }
 
-    // 9. Fullscreen Toggle
+    // 10. Fullscreen Toggle
     const fsBtn = document.getElementById('fullscreen-btn');
     if (fsBtn) {
       fsBtn.addEventListener('click', () => {
@@ -123,7 +136,7 @@ class HUDManager {
       });
     }
 
-    // 10. Hide/Show HUD Toggle
+    // 11. Hide/Show HUD Toggle
     const hideHudBtn = document.getElementById('hide-hud-btn');
     if (hideHudBtn) {
       hideHudBtn.addEventListener('click', () => {
@@ -145,6 +158,14 @@ class HUDManager {
         this.terminal.toggle();
       } else if (k === 'b' && window.audioEngine) {
         window.audioEngine.playBraaam();
+      } else if (k === 's' && window.audioEngine) {
+        const active = window.audioEngine.toggleSynthwave();
+        if (synthBtn) {
+          synthBtn.classList.toggle('active', active);
+          synthBtn.textContent = active ? 'SYNTH: ON' : 'SYNTH [S]';
+        }
+      } else if (e.key === 'Enter' && this.sm.currentAct === 4) {
+        this.sm.fireLasers();
       } else if (k === 'c') {
         const modes = ['director', 'trailer', 'cockpit', 'free'];
         const curIdx = modes.indexOf(this.sm.cameraMode);
@@ -153,7 +174,7 @@ class HUDManager {
         const directorBtns = document.querySelectorAll('.director-btn');
         directorBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-cam') === nextMode));
         if (window.audioEngine) window.audioEngine.playHoloBeep(980, 'sine');
-      } else if (['1', '2', '3', '4', '5'].includes(k)) {
+      } else if (['1', '2', '3', '4', '5', '6', '7'].includes(k)) {
         const act = parseInt(k);
         this.sm.setActiveAct(act);
         this.updateNavHighlight(act);

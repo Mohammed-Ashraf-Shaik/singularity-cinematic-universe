@@ -88,14 +88,18 @@ class HoloTerminal {
     switch (cmd) {
       case 'help':
         this.printLine("--- AETHEL DIRECTIVES MENU ---", "system");
-        this.printLine("  warp <1-5>       : Engage hyperjump to Act (1=Singularity, 2=City, 3=Quantum, 4=Flight, 5=Codex)", "cyan");
-        this.printLine("  blackhole        : Jump to Gargantua Event Horizon", "cyan");
-        this.printLine("  cyberpunk        : Jump to Sector 07 Neo-Babylon Megacity", "cyan");
-        this.printLine("  quantum          : Jump to Quantum Calabi-Yau Core", "cyan");
-        this.printLine("  flight           : Engage Hyperspace Flight Simulator", "cyan");
-        this.printLine("  codex            : Access Multiverse Archive & Planet Scanner", "cyan");
+        this.printLine("  warp <1-7>       : Engage hyperjump to Act (1-7)", "cyan");
+        this.printLine("  blackhole        : Jump to Gargantua Event Horizon (Act 1)", "cyan");
+        this.printLine("  cyberpunk        : Jump to Sector 07 Neo-Babylon Megacity (Act 2)", "cyan");
+        this.printLine("  quantum          : Jump to Quantum Calabi-Yau Core (Act 3)", "cyan");
+        this.printLine("  flight           : Engage Hyperspace Flight Simulator (Act 4)", "cyan");
+        this.printLine("  codex            : Access Multiverse Archive & Planet Scanner (Act 5)", "cyan");
+        this.printLine("  dyson            : Jump to The Dyson Sphere Stellar Harvester (Act 6)", "cyan");
+        this.printLine("  stargate         : Jump to The Tachyon Stargate Event Horizon (Act 7)", "cyan");
+        this.printLine("  fire             : Discharge dual plasma photon cannons (Act 4)", "cyan");
+        this.printLine("  synthwave        : Toggle 128 BPM cyberpunk procedural sequencer", "cyan");
         this.printLine("  braaam           : Synthesize Hans Zimmer cinematic horn blast", "cyan");
-        this.printLine("  camera <mode>    : Switch camera ('director' or 'free')", "cyan");
+        this.printLine("  camera <mode>    : Switch camera ('director', 'trailer', 'cockpit', 'free')", "cyan");
         this.printLine("  status           : Display vessel telemetry & shield integrity", "cyan");
         this.printLine("  time             : Measure relativistic time dilation", "cyan");
         this.printLine("  shields          : Recalibrate magnetic defense fields", "cyan");
@@ -106,11 +110,11 @@ class HoloTerminal {
 
       case 'warp':
         const actNum = parseInt(arg);
-        if (actNum >= 1 && actNum <= 5) {
+        if (actNum >= 1 && actNum <= 7) {
           this.sm.setActiveAct(actNum);
           this.printLine(`WARP ENGAGED: Jumping to Act ${actNum}...`, "success");
         } else {
-          this.printLine("Error: Specify act number 1 to 5 (e.g. 'warp 4')", "error");
+          this.printLine("Error: Specify act number 1 to 7 (e.g. 'warp 6')", "error");
         }
         break;
 
@@ -142,6 +146,36 @@ class HoloTerminal {
         this.printLine("Accessing Multiverse Archive...", "success");
         const codexModal = document.getElementById('codex-modal');
         if (codexModal) codexModal.classList.add('active');
+        break;
+
+      case 'dyson':
+      case 'star':
+        this.sm.setActiveAct(6);
+        this.printLine("Course plotted: The Dyson Sphere Stellar Harvester.", "success");
+        break;
+
+      case 'stargate':
+      case 'portal':
+        this.sm.setActiveAct(7);
+        this.printLine("Course plotted: Tachyon Stargate Multiverse Portal.", "success");
+        break;
+
+      case 'fire':
+      case 'laser':
+        if (this.sm.currentAct === 4) {
+          this.sm.fireLasers();
+          this.printLine("FIRING DUAL PLASMA CANNONS...", "warning");
+        } else {
+          this.printLine("Notice: Weapons online only in Act 4 (Hyperspace Flight).", "error");
+        }
+        break;
+
+      case 'synthwave':
+      case 'beat':
+        if (window.audioEngine) {
+          const active = window.audioEngine.toggleSynthwave();
+          this.printLine(`Cyberpunk Synthwave: ${active ? 'ENGAGED [128 BPM]' : 'PAUSED'}`, "success");
+        }
         break;
 
       case 'braaam':

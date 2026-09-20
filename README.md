@@ -35,9 +35,11 @@
    - Superconducting magnetic containment rings revolving along orthogonal Euler axes.
    - 2,000 sub-atomic floating quantum sparks.
 
-4. **Act IV: Hyperspace Warp Runner (Flight Simulator)**
+4. **Act IV: Hyperspace Warp Runner (Flight Simulator & Combat)**
    - Interactive high-velocity flight through a procedural wormhole vortex.
    - Pilot your interceptor spacecraft using `WASD` or Arrow Keys.
+   - **Dual Plasma Photon Cannons**: Fire with Left Click or `Enter` to destroy crystalline space debris for score bonuses!
+   - Collision recoil and screen-shake physics on debris impact.
    - Fly through holographic acceleration rings for score multipliers and speed boosts (up to Mach 9999).
    - Dynamic thruster sound that modulates pitch and resonance based on vessel throttle.
 
@@ -46,6 +48,16 @@
    - Bioluminescent surface topography and stardust rings.
    - Orbiting scanner probes analyzing atmospheric composition, surface gravity, and habitability ratings.
 
+6. **Act VI: The Dyson Sphere (Stellar Harvester)**
+   - Mega-scale Dyson swarm encasing a blazing procedural star with coronal plasma flares.
+   - Three concentric orbiting collector rings with dozens of hexagonal solar mirrors.
+   - Orbital energy capacitor station with focused plasma transfer beams.
+
+7. **Act VII: The Tachyon Stargate (Multiverse Portal)**
+   - Ancient metallic Stargate ring structure with rotating chevron glyph dials.
+   - Shimmering liquid dimensional wormhole event horizon shader.
+   - Crackling electric lightning arcs dancing across the event horizon.
+
 ---
 
 ## 🔊 Procedural Web Audio Engine
@@ -53,9 +65,11 @@
 Zero static audio files are used. The entire soundscape is generated algorithmically in real time using the **Web Audio API**:
 - **Hans Zimmer Cinematic Drone**: Detuned saw and sine wave oscillators routed through resonant lowpass filters with slow LFO frequency swells, playing emotional harmonic progressions ($D_{min} \rightarrow B\flat \rightarrow F \rightarrow C \rightarrow G_{min}$).
 - **The Iconic "BRAAAM" Horn Blast**: Distorted brass oscillators with exponential pitch decay and sub-bass impact.
+- **Cyberpunk Synthwave Sequencer**: 16-step procedural bassline synthesizer (128 BPM) with 4-on-the-floor kicks and offbeat hi-hats. Toggle with `S`.
+- **Dual Plasma Laser Cannons**: High-velocity frequency sweep blaster sound with sharp transient attack.
+- **Debris Explosion SFX**: Resonant low-pass filtered noise burst with sub-bass thump.
 - **Hyperspace Warp Jump**: Rising frequency chirp with stereo Doppler pan and sub-bass drop.
 - **Adaptive Thruster Sound**: Pink/Brown noise generator with real-time frequency tracking linked to flight velocity.
-- **High-Tech Holographic SFX**: Crystal UI chirps, scanner pings, and deflector shield harmonics.
 - **Real-Time FFT Audio Visualizer**: 32-band frequency spectrum rendered directly onto the HUD canvas.
 
 ---
@@ -64,14 +78,18 @@ Zero static audio files are used. The entire soundscape is generated algorithmic
 
 Press `T` or click **TERMINAL** to open the interactive sci-fi console. Supported commands:
 - `help` - Lists all vessel commands and protocols
-- `warp <1-5>` - Hyperjump directly to specified act
-- `blackhole` - Teleport to Gargantua Event Horizon
-- `cyberpunk` - Jump to Sector 07 Megacity
-- `quantum` - Enter the Calabi-Yau Core
-- `flight` - Launch the Hyperspace Flight Simulator
-- `codex` - Open the Multiverse Planetary Archive
+- `warp <1-7>` - Hyperjump directly to specified act (1 to 7)
+- `blackhole` - Teleport to Gargantua Event Horizon (Act 1)
+- `cyberpunk` - Jump to Sector 07 Megacity (Act 2)
+- `quantum` - Enter the Calabi-Yau Core (Act 3)
+- `flight` - Launch the Hyperspace Flight Simulator (Act 4)
+- `codex` - Open the Multiverse Planetary Archive (Act 5)
+- `dyson` - Jump to The Dyson Sphere Stellar Harvester (Act 6)
+- `stargate` - Jump to The Tachyon Stargate Event Horizon (Act 7)
+- `fire` - Discharge dual plasma photon cannons (Act 4)
+- `synthwave` - Toggle 128 BPM cyberpunk procedural sequencer
 - `braaam` - Trigger Hans Zimmer horn blast
-- `camera [director|free]` - Toggle camera perspectives
+- `camera <mode>` - Toggle camera ('director', 'trailer', 'cockpit', 'free')
 - `status` - Telemetry diagnostics and shield status
 - `time` - Measure relativistic time dilation
 - `shields` - Recalibrate deflector harmonics
