@@ -1,11 +1,14 @@
 # 🌌 PROJECT AETHEL: THE SINGULARITY PROTOCOL
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-GitHub_Pages-00f0ff?style=for-the-badge&logo=github)](https://mohammed-ashraf-shaik.github.io/singularity-cinematic-universe/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-cyan.svg)](https://opensource.org/licenses/MIT)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-black?logo=three.js)](https://threejs.org/)
 [![Web Audio API](https://img.shields.io/badge/Audio-Procedural_WebAudio-blueviolet)](#procedural-audio-engine)
 [![60 FPS](https://img.shields.io/badge/Performance-60_FPS_Locked-00ff88)](#performance-architecture)
 
 > *“Beyond the event horizon lies not the end of time, but the inception of infinity.”*
+
+🔗 **Live Experience**: [https://mohammed-ashraf-shaik.github.io/singularity-cinematic-universe/](https://mohammed-ashraf-shaik.github.io/singularity-cinematic-universe/)
 
 **Project Aethel** is a state-of-the-art, hyper-cinematic 3D WebGL odyssey built from the ground up with Three.js, custom GLSL shaders, procedural Web Audio synthesis, and an interactive sci-fi HUD. It delivers an AAA film-grade interactive experience directly in the browser with zero external dependencies.
 
