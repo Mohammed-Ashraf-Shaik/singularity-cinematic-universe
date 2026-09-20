@@ -216,6 +216,139 @@ const CustomShaders = {
         gl_FragColor = vec4(col * (1.2 + fresnel * 2.0), clamp(0.3 + fresnel * 0.7, 0.0, 1.0));
       }
     `
+  },
+
+  // --------------------------------------------------------------------------
+  // 4. DYSON SOLAR SURFACE PROCEDURAL SHADER
+  // --------------------------------------------------------------------------
+  DysonSolarSurface: {
+    uniforms: {
+      time: { value: 0 },
+      solarColorA: { value: new THREE.Color(0xff4500) },
+      solarColorB: { value: new THREE.Color(0xffea00) },
+      audioIntensity: { value: 0.0 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vWorldPos;
+
+      void main() {
+        vUv = uv;
+        vNormal = normalize(normalMatrix * normal);
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vWorldPos = worldPos.xyz;
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 solarColorA;
+      uniform vec3 solarColorB;
+      uniform float audioIntensity;
+
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vWorldPos;
+
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+      }
+
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+                   mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+      }
+
+      float fbm(vec2 p) {
+        float v = 0.0;
+        float a = 0.5;
+        for (int i = 0; i < 4; ++i) {
+          v += a * noise(p);
+          p = p * 2.2;
+          a *= 0.5;
+        }
+        return v;
+      }
+
+      void main() {
+        vec2 p = vUv * 8.0;
+        float n1 = fbm(p + time * 0.15);
+        float n2 = fbm(p * 1.8 - time * 0.2 + n1);
+
+        // Corona limb brightening
+        vec3 viewDir = normalize(cameraPosition - vWorldPos);
+        float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
+        fresnel = pow(fresnel, 2.0);
+
+        vec3 col = mix(solarColorA, solarColorB, n2 * 1.4);
+        col += vec3(1.0, 0.9, 0.5) * (fresnel * 1.5 + audioIntensity * 0.4);
+
+        gl_FragColor = vec4(col * 1.8, 1.0);
+      }
+    `
+  },
+
+  // --------------------------------------------------------------------------
+  // 5. STARGATE DIMENSIONAL EVENT HORIZON SHADER
+  // --------------------------------------------------------------------------
+  StargateHorizon: {
+    uniforms: {
+      time: { value: 0 },
+      portalColor: { value: new THREE.Color(0x00d0ff) },
+      energyColor: { value: new THREE.Color(0xffffff) },
+      audioIntensity: { value: 0.0 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vPosition;
+
+      void main() {
+        vUv = uv;
+        vPosition = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 portalColor;
+      uniform vec3 energyColor;
+      uniform float audioIntensity;
+
+      varying vec2 vUv;
+      varying vec3 vPosition;
+
+      void main() {
+        vec2 uv = vUv - 0.5;
+        float r = length(uv) * 2.0;
+
+        if (r > 1.0) discard;
+
+        float theta = atan(uv.y, uv.x);
+
+        // Concentric ripples and vortex spin
+        float ripples = sin(r * 32.0 - time * 6.0 + sin(theta * 6.0)) * 0.5 + 0.5;
+        ripples = pow(ripples, 2.5);
+
+        // Electric lightning sparks
+        float sparks = sin(theta * 18.0 + time * 8.0) * sin(r * 24.0);
+        sparks = pow(clamp(sparks, 0.0, 1.0), 5.0);
+
+        // Central vortex glow
+        float coreGlow = 1.0 - smoothstep(0.0, 0.75, r);
+
+        vec3 col = mix(portalColor, energyColor, ripples * 0.6 + sparks * 0.8);
+        col += vec3(0.1, 0.5, 1.0) * coreGlow * 1.5;
+        col += vec3(0.5, 0.8, 1.0) * audioIntensity * 0.4;
+
+        float alpha = clamp(ripples * 0.7 + coreGlow * 0.85 + sparks, 0.25, 0.95);
+
+        gl_FragColor = vec4(col * 1.6, alpha);
+      }
+    `
   }
 };
 
