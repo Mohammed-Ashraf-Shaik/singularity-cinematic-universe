@@ -354,6 +354,158 @@ class AudioEngine {
     osc.stop(now + 0.95);
   }
 
+  // Holographic Laser Pulse Cannon SFX
+  playLaserShot() {
+    if (!this.ctx || this.isMuted) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const filter = this.ctx.createBiquadFilter();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(2200, now);
+    osc.frequency.exponentialRampToValueAtTime(160, now + 0.12);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(4500, now);
+    filter.frequency.exponentialRampToValueAtTime(300, now + 0.12);
+
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(now);
+    osc.stop(now + 0.14);
+  }
+
+  // Debris & Drone Explosion SFX
+  playExplosion() {
+    if (!this.ctx || this.isMuted) return;
+
+    const now = this.ctx.currentTime;
+
+    // 1. Noise burst
+    const bufferSize = this.ctx.sampleRate * 0.5;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.12));
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, now);
+    filter.frequency.exponentialRampToValueAtTime(60, now + 0.5);
+
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.7, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(this.sfxGain);
+
+    noise.start(now);
+
+    // 2. Sub impact thump
+    const subOsc = this.ctx.createOscillator();
+    const subGain = this.ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(110, now);
+    subOsc.frequency.exponentialRampToValueAtTime(25, now + 0.6);
+
+    subGain.gain.setValueAtTime(0.8, now);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+
+    subOsc.connect(subGain);
+    subGain.connect(this.sfxGain);
+
+    subOsc.start(now);
+    subOsc.stop(now + 0.7);
+  }
+
+  // Cyberpunk Synthwave 16-Step Procedural Sequencer
+  toggleSynthwave() {
+    this.isSynthwaveActive = !this.isSynthwaveActive;
+    if (this.isSynthwaveActive) {
+      this.synthStep = 0;
+      this.runSynthwaveStep();
+      console.log('⚡ [AudioEngine] Cyberpunk Synthwave engine activated.');
+    } else {
+      if (this.synthTimer) clearTimeout(this.synthTimer);
+      console.log('⚡ [AudioEngine] Cyberpunk Synthwave engine paused.');
+    }
+    return this.isSynthwaveActive;
+  }
+
+  runSynthwaveStep() {
+    if (!this.isSynthwaveActive || !this.ctx || this.isMuted) return;
+
+    const now = this.ctx.currentTime;
+    const step = this.synthStep % 16;
+    this.synthStep++;
+
+    // 16-step bassline pattern (D minor driving synthwave notes)
+    // 0: D2, 1: D2, 2: D3, 3: D2, 4: F2, 5: D2, 6: A2, 7: D2...
+    const bassNotes = [73.4, 73.4, 146.8, 73.4, 87.3, 73.4, 110.0, 73.4, 73.4, 73.4, 146.8, 73.4, 65.4, 73.4, 98.0, 73.4];
+    const freq = bassNotes[step];
+
+    // Synth Bass
+    const osc = this.ctx.createOscillator();
+    const filter = this.ctx.createBiquadFilter();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, now);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(850, now);
+    filter.frequency.exponentialRampToValueAtTime(140, now + 0.11);
+    filter.Q.setValueAtTime(6.0, now);
+
+    gain.gain.setValueAtTime(0.28, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(now);
+    osc.stop(now + 0.13);
+
+    // 4-on-the-floor Kick on beats 0, 4, 8, 12
+    if (step % 4 === 0) {
+      const kickOsc = this.ctx.createOscillator();
+      const kickGain = this.ctx.createGain();
+      kickOsc.type = 'sine';
+      kickOsc.frequency.setValueAtTime(130, now);
+      kickOsc.frequency.exponentialRampToValueAtTime(32, now + 0.1);
+
+      kickGain.gain.setValueAtTime(0.6, now);
+      kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+      kickOsc.connect(kickGain);
+      kickGain.connect(this.masterGain);
+
+      kickOsc.start(now);
+      kickOsc.stop(now + 0.14);
+    }
+
+    // Hi-hat on every offbeat (2, 6, 10, 14)
+    if (step % 2 === 1) {
+      this.playHoloBeep(3200, 'triangle');
+    }
+
+    // Next step at 128 BPM (16th notes = 117ms per step)
+    this.synthTimer = setTimeout(() => this.runSynthwaveStep(), 117);
+  }
+
   // Toggle Mute
   toggleMute() {
     this.isMuted = !this.isMuted;
