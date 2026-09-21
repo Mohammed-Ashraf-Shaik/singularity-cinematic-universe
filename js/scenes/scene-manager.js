@@ -436,20 +436,31 @@ class SceneManager {
   // --------------------------------------------------------------------------
   generateProceduralTextures() {
     this.sharedTextures.sun = this.createSunTexture();
-    this.sharedTextures.mercury = this.createCrateredTexture('#6b6b6b', '#3b3b3b', '#9c9c9c', 40);
-    this.sharedTextures.venus = this.createSwirlTexture('#cbb184', '#e6cf9b', '#9c7b4a');
+    this.sharedTextures.mercury = this.createMercuryTexture();
+    this.sharedTextures.venus = this.createVenusTexture();
     this.sharedTextures.earthDay = this.createEarthDayTexture();
     this.sharedTextures.earthNight = this.createEarthNightTexture();
     this.sharedTextures.earthSpec = this.createEarthSpecTexture();
     this.sharedTextures.earthClouds = this.createEarthCloudsTexture();
-    this.sharedTextures.moon = this.createCrateredTexture('#888888', '#555555', '#bbbbbb', 60);
+    this.sharedTextures.moon = this.createMoonTexture();
     this.sharedTextures.mars = this.createMarsTexture();
+    this.sharedTextures.phobos = this.createPhobosTexture();
+    this.sharedTextures.ceres = this.createCeresTexture();
     this.sharedTextures.jupiter = this.createJupiterTexture();
+    this.sharedTextures.io = this.createIoTexture();
+    this.sharedTextures.europa = this.createEuropaTexture();
+    this.sharedTextures.ganymede = this.createGanymedeTexture();
+    this.sharedTextures.callisto = this.createCallistoTexture();
     this.sharedTextures.saturn = this.createSaturnTexture();
     this.sharedTextures.saturnRings = this.createSaturnRingsTexture();
+    this.sharedTextures.titan = this.createTitanTexture();
+    this.sharedTextures.enceladus = this.createEnceladusTexture();
     this.sharedTextures.uranus = this.createUranusTexture();
+    this.sharedTextures.uranusRings = this.createUranusRingsTexture();
     this.sharedTextures.neptune = this.createNeptuneTexture();
+    this.sharedTextures.triton = this.createTritonTexture();
     this.sharedTextures.pluto = this.createPlutoTexture();
+    this.sharedTextures.charon = this.createCharonTexture();
   }
 
   createSunTexture() {
@@ -459,24 +470,46 @@ class SceneManager {
     const ctx = canvas.getContext('2d');
 
     const grad = ctx.createLinearGradient(0, 0, 0, 512);
-    grad.addColorStop(0, '#ff4500');
-    grad.addColorStop(0.3, '#ff8c00');
-    grad.addColorStop(0.5, '#ffd700');
-    grad.addColorStop(0.7, '#ff8c00');
-    grad.addColorStop(1, '#ff4500');
+    grad.addColorStop(0, '#ff3e00');
+    grad.addColorStop(0.25, '#ff8000');
+    grad.addColorStop(0.5, '#ffd200');
+    grad.addColorStop(0.75, '#ff8000');
+    grad.addColorStop(1, '#ff3e00');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 1024, 512);
 
-    // Convective noise cells
-    for (let i = 0; i < 600; i++) {
+    // Convective granulation noise cells
+    for (let i = 0; i < 900; i++) {
       const x = Math.random() * 1024;
       const y = Math.random() * 512;
-      const r = Math.random() * 12 + 4;
-      ctx.fillStyle = Math.random() > 0.4 ? 'rgba(255, 255, 220, 0.25)' : 'rgba(180, 40, 0, 0.35)';
+      const r = Math.random() * 14 + 3;
+      ctx.fillStyle = Math.random() > 0.45 ? 'rgba(255, 255, 220, 0.28)' : 'rgba(180, 35, 0, 0.35)';
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    // Solar Magnetic Sunspots (Umbra & Penumbra)
+    const sunspots = [
+      { x: 320, y: 220, r: 16 },
+      { x: 345, y: 232, r: 9 },
+      { x: 680, y: 290, r: 22 },
+      { x: 715, y: 278, r: 12 },
+      { x: 700, y: 310, r: 8 },
+      { x: 840, y: 240, r: 14 }
+    ];
+    sunspots.forEach(sp => {
+      // Penumbra
+      ctx.fillStyle = 'rgba(110, 35, 5, 0.75)';
+      ctx.beginPath();
+      ctx.arc(sp.x, sp.y, sp.r * 1.7, 0, Math.PI * 2);
+      ctx.fill();
+      // Umbra
+      ctx.fillStyle = '#1c0500';
+      ctx.beginPath();
+      ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -484,62 +517,180 @@ class SceneManager {
     return tex;
   }
 
-  createCrateredTexture(base, dark, light, numCraters) {
+  createMercuryTexture() {
+    // NASA MESSENGER Cartographic Mosaic: Basaltic low albedo (0.12), Caloris Basin, rayed craters
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
+    canvas.width = 2048;
+    canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = base;
-    ctx.fillRect(0, 0, 1024, 512);
+    // Base charcoal-brown basalt
+    ctx.fillStyle = '#36322c';
+    ctx.fillRect(0, 0, 2048, 1024);
 
-    // Subtle noise field
-    for (let i = 0; i < 4000; i++) {
-      ctx.fillStyle = Math.random() > 0.5 ? light : dark;
-      ctx.globalAlpha = 0.08;
-      ctx.fillRect(Math.random() * 1024, Math.random() * 512, Math.random() * 6 + 2, Math.random() * 6 + 2);
+    // Subtle geological tonal variations
+    for (let i = 0; i < 4500; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(75, 68, 60, 0.12)' : 'rgba(35, 30, 26, 0.14)';
+      ctx.fillRect(Math.random() * 2048, Math.random() * 1024, Math.random() * 16 + 4, Math.random() * 16 + 4);
     }
-    ctx.globalAlpha = 1.0;
 
-    // Distinct impact craters
-    for (let i = 0; i < numCraters; i++) {
-      const x = Math.random() * 1024;
-      const y = Math.random() * 512;
-      const r = Math.random() * 18 + 4;
+    // Widespread impact craters
+    for (let i = 0; i < 280; i++) {
+      const x = Math.random() * 2048;
+      const y = Math.random() * 960 + 32;
+      const r = Math.random() * 22 + 4;
 
-      ctx.fillStyle = dark;
+      ctx.fillStyle = '#221f1b';
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.strokeStyle = light;
-      ctx.lineWidth = Math.max(1, r * 0.2);
+      // Highlighted crater rim
+      ctx.strokeStyle = '#5a5246';
+      ctx.lineWidth = Math.max(1.2, r * 0.22);
       ctx.beginPath();
-      ctx.arc(x - r * 0.15, y - r * 0.15, r * 0.9, 0, Math.PI * 2);
+      ctx.arc(x - r * 0.12, y - r * 0.12, r * 0.95, 0, Math.PI * 2);
       ctx.stroke();
     }
+
+    // Caloris Basin (1,550 km multi-ring impact basin)
+    const cbX = 620;
+    const cbY = 480;
+    const cbR = 190;
+
+    // Interior lava smooth plains
+    const calorisGrad = ctx.createRadialGradient(cbX, cbY, 10, cbX, cbY, cbR);
+    calorisGrad.addColorStop(0, '#26221d');
+    calorisGrad.addColorStop(0.7, '#2f2a24');
+    calorisGrad.addColorStop(0.92, '#50483e');
+    calorisGrad.addColorStop(1.0, '#36322c');
+    ctx.fillStyle = calorisGrad;
+    ctx.beginPath();
+    ctx.arc(cbX, cbY, cbR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Concentric mountain scarps around Caloris
+    [cbR * 0.55, cbR * 0.8, cbR * 1.0].forEach(ringR => {
+      ctx.strokeStyle = 'rgba(100, 90, 78, 0.6)';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(cbX, cbY, ringR, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+
+    // Pantheon Fossae radiating extensional graben troughs
+    ctx.strokeStyle = 'rgba(70, 62, 52, 0.5)';
+    ctx.lineWidth = 1.5;
+    for (let a = 0; a < Math.PI * 2; a += Math.PI / 12) {
+      ctx.beginPath();
+      ctx.moveTo(cbX, cbY);
+      ctx.lineTo(cbX + Math.cos(a) * (cbR * 0.75), cbY + Math.sin(a) * (cbR * 0.75));
+      ctx.stroke();
+    }
+
+    // Debussy Crater (Extensive Bright Radial Ejecta Ray System)
+    const debX = 1420;
+    const debY = 680;
+    // Radial bright ejecta rays
+    for (let r = 0; r < 36; r++) {
+      const angle = (r / 36) * Math.PI * 2 + (Math.random() - 0.5) * 0.08;
+      const rayLen = 180 + Math.random() * 380;
+      ctx.strokeStyle = 'rgba(235, 230, 220, 0.38)';
+      ctx.lineWidth = Math.random() * 3.5 + 1.2;
+      ctx.beginPath();
+      ctx.moveTo(debX, debY);
+      ctx.lineTo(debX + Math.cos(angle) * rayLen, debY + Math.sin(angle) * rayLen);
+      ctx.stroke();
+    }
+    // Bright central crater
+    ctx.fillStyle = '#faf6ed';
+    ctx.beginPath();
+    ctx.arc(debX, debY, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#e2dcce';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Kuiper Crater with bright halo
+    const kuiX = 980;
+    const kuiY = 460;
+    for (let r = 0; r < 20; r++) {
+      const angle = (r / 20) * Math.PI * 2;
+      const rayLen = 90 + Math.random() * 160;
+      ctx.strokeStyle = 'rgba(225, 220, 210, 0.3)';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(kuiX, kuiY);
+      ctx.lineTo(kuiX + Math.cos(angle) * rayLen, kuiY + Math.sin(angle) * rayLen);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#f0ebe0';
+    ctx.beginPath();
+    ctx.arc(kuiX, kuiY, 14, 0, Math.PI * 2);
+    ctx.fill();
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
     return tex;
   }
 
-  createSwirlTexture(color1, color2, color3) {
+  createVenusTexture() {
+    // NASA Magellan & Akatsuki UV/Visible: Creamy sulfuric acid clouds, zonal chevron shear
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
+    canvas.width = 2048;
+    canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = color1;
-    ctx.fillRect(0, 0, 1024, 512);
+    // Base warm cream-amber sulfuric haze
+    ctx.fillStyle = '#ebdcb7';
+    ctx.fillRect(0, 0, 2048, 1024);
 
-    for (let y = 0; y < 512; y += 4) {
-      const wave = Math.sin(y * 0.04) * 40 + Math.cos(y * 0.015) * 60;
-      ctx.fillStyle = y % 8 === 0 ? color2 : color3;
-      ctx.globalAlpha = 0.45;
-      ctx.fillRect(0, y, 1024, 6);
+    // Zonal horizontal wind bands
+    const cloudBands = ['#f4ecd8', '#ebd8af', '#e4cea0', '#ebdcb7', '#d8be8d', '#eedcb8'];
+    for (let y = 0; y < 1024; y += 4) {
+      const idx = Math.floor((y / 1024) * cloudBands.length * 2) % cloudBands.length;
+      ctx.fillStyle = cloudBands[idx];
+      ctx.globalAlpha = 0.5;
+      ctx.fillRect(0, y, 2048, 4);
     }
     ctx.globalAlpha = 1.0;
+
+    // Supersonic V-shaped chevron wave streaks (360 km/h retrograde wind shear)
+    ctx.strokeStyle = 'rgba(190, 162, 115, 0.28)';
+    ctx.lineWidth = 3.5;
+    for (let row = 180; row < 860; row += 55) {
+      for (let x = -100; x < 2148; x += 160) {
+        ctx.beginPath();
+        ctx.moveTo(x - 70, row - 25);
+        ctx.lineTo(x, row);
+        ctx.lineTo(x - 70, row + 25);
+        ctx.stroke();
+      }
+    }
+
+    // High altitude turbulent streaks
+    for (let i = 0; i < 70; i++) {
+      const y = Math.random() * 800 + 112;
+      ctx.strokeStyle = i % 2 === 0 ? 'rgba(255, 252, 240, 0.22)' : 'rgba(165, 138, 92, 0.18)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      for (let x = 0; x < 2048; x += 64) {
+        ctx.lineTo(x, y + Math.sin(x * 0.02 + y) * 12);
+      }
+      ctx.stroke();
+    }
+
+    // Polar Vortex Dipoles (North & South Pole spirals)
+    [60, 964].forEach(py => {
+      ctx.strokeStyle = 'rgba(180, 150, 100, 0.35)';
+      ctx.lineWidth = 3.0;
+      for (let r = 20; r < 90; r += 14) {
+        ctx.beginPath();
+        ctx.ellipse(1024, py, r * 3, r, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    });
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -547,50 +698,129 @@ class SceneManager {
   }
 
   createEarthDayTexture() {
+    // NASA Blue Marble True-Color: Bathymetric oceans, true continental topography, lush vegetation
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
+    canvas.width = 2048;
+    canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
-    // Ocean deep blue
-    const oceanGrad = ctx.createLinearGradient(0, 0, 0, 512);
-    oceanGrad.addColorStop(0, '#0a2342');
-    oceanGrad.addColorStop(0.5, '#0d3b66');
-    oceanGrad.addColorStop(1, '#0a2342');
+    // Bathymetric deep ocean gradient
+    const oceanGrad = ctx.createLinearGradient(0, 0, 0, 1024);
+    oceanGrad.addColorStop(0.0, '#06162a');
+    oceanGrad.addColorStop(0.2, '#09213f');
+    oceanGrad.addColorStop(0.5, '#0d2d54');
+    oceanGrad.addColorStop(0.8, '#09213f');
+    oceanGrad.addColorStop(1.0, '#06162a');
     ctx.fillStyle = oceanGrad;
-    ctx.fillRect(0, 0, 1024, 512);
+    ctx.fillRect(0, 0, 2048, 1024);
 
-    // Procedural Continents (Americas, Eurasia, Africa, Australia, Antarctica)
-    const drawLandMass = (cx, cy, rx, ry, col) => {
-      ctx.fillStyle = col;
+    // Continental shelf shallow coastal waters
+    const drawShelf = (cx, cy, rx, ry) => {
+      ctx.fillStyle = 'rgba(24, 88, 128, 0.35)';
       ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0.2, 0, Math.PI * 2);
+      ctx.ellipse(cx, cy, rx * 1.15, ry * 1.15, 0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    // North America (Alaska, Canada, USA, Mexico, Baja)
+    drawShelf(580, 360, 180, 130);
+    // South America
+    drawShelf(720, 660, 130, 190);
+    // Eurasia
+    drawShelf(1400, 340, 260, 160);
+    // Africa
+    drawShelf(1120, 560, 150, 180);
+    // Australia
+    drawShelf(1680, 720, 110, 85);
+
+    // Realistic Continental Landmasses
+    const drawLandmass = (cx, cy, rx, ry, baseColor, roughSteps = 30) => {
+      ctx.fillStyle = baseColor;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Roughen coastline
-      for (let i = 0; i < 24; i++) {
+      // Geological perimeter fracture and fractal coastlines
+      for (let i = 0; i < roughSteps; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * (rx * 0.7);
-        const r = Math.random() * (rx * 0.4);
+        const dist = Math.random() * (rx * 0.85);
+        const r = Math.random() * (rx * 0.45) + 8;
         ctx.beginPath();
         ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, r, 0, Math.PI * 2);
         ctx.fill();
       }
     };
 
-    // North & South America
-    drawLandMass(280, 180, 80, 60, '#2d5a27');
-    drawLandMass(340, 320, 60, 90, '#1e4620');
-    // Europe & Africa
-    drawLandMass(540, 160, 60, 45, '#3b6e35');
-    drawLandMass(550, 270, 70, 80, '#937340');
-    // Asia & Australia
-    drawLandMass(720, 170, 110, 75, '#2e5828');
-    drawLandMass(820, 350, 45, 35, '#8c7042');
-    // Polar Ice Caps
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, 1024, 30);
-    ctx.fillRect(0, 475, 1024, 37);
+    // 1. North America (Boreal forests, Great Plains, Mexican deserts)
+    drawLandmass(560, 340, 170, 115, '#2c5926', 45);
+    drawLandmass(620, 380, 120, 75, '#48682e', 35);
+    drawLandmass(520, 460, 65, 80, '#9a7f45', 25); // Mexico / Southwest arid
+    drawLandmass(430, 260, 85, 55, '#35562a', 20); // Alaska
+
+    // Greenland Ice Sheet
+    ctx.fillStyle = '#ebf2f8';
+    ctx.beginPath();
+    ctx.ellipse(780, 210, 65, 95, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. South America (Amazon Basin, Andes mountain chain, Pampas)
+    drawLandmass(720, 580, 115, 90, '#1a481a', 40); // Amazon lush rainforest
+    drawLandmass(730, 710, 80, 130, '#506e36', 35); // Brazilian highlands / Pampas
+    // Andes Mountain Cordillera (Dry brown ridge along western coast)
+    ctx.strokeStyle = '#5a422a';
+    ctx.lineWidth = 14;
+    ctx.beginPath();
+    ctx.moveTo(630, 510);
+    ctx.bezierCurveTo(635, 620, 650, 730, 690, 870);
+    ctx.stroke();
+
+    // 3. Europe & Mediterranean (Scandinavia, UK, France, Germany, Italy, Balkans)
+    drawLandmass(1080, 310, 110, 80, '#36682c', 35);
+    drawLandmass(1010, 280, 35, 45, '#326028', 15); // British Isles
+    drawLandmass(1100, 220, 45, 75, '#2a5224', 20); // Scandinavia
+
+    // 4. Africa (Sahara Desert, Sahel, Congo Rainforest, South Africa)
+    drawLandmass(1120, 450, 155, 75, '#c8994d', 40); // Vast Sahara Desert
+    drawLandmass(1130, 590, 120, 110, '#184419', 45); // Congo Basin Rainforest
+    drawLandmass(1160, 720, 85, 95, '#5d6e32', 30); // Southern Africa
+    drawLandmass(1285, 690, 22, 55, '#2c5826', 15); // Madagascar
+
+    // 5. Eurasia (Siberia, Tibetan Plateau, Himalayas, India, East Asia)
+    drawLandmass(1440, 290, 240, 110, '#244e22', 50); // Siberian Taiga
+    drawLandmass(1520, 380, 140, 95, '#3c642e', 40); // China / East Asia
+    drawLandmass(1360, 420, 80, 50, '#8d7348', 25); // Tibetan Plateau & Gobi Desert
+    drawLandmass(1360, 520, 75, 80, '#38642a', 30); // Indian Subcontinent
+    drawLandmass(1560, 580, 65, 70, '#224e20', 25); // Southeast Asia
+
+    // Himalayan Snowcaps
+    ctx.strokeStyle = '#f8fbff';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(1330, 435);
+    ctx.lineTo(1430, 430);
+    ctx.stroke();
+
+    // 6. Australia & Oceania (Red Outback, green coastlines, New Zealand)
+    drawLandmass(1680, 715, 115, 85, '#a65426', 35); // Arid Red Outback
+    // Green coastal rim
+    ctx.strokeStyle = '#346628';
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.arc(1680, 715, 90, -0.6, 1.8);
+    ctx.stroke();
+    drawLandmass(1840, 790, 18, 45, '#2e5a26', 10); // New Zealand
+
+    // 7. Antarctica (Massive Southern Ice Sheet)
+    ctx.fillStyle = '#f2f6fc';
+    ctx.fillRect(0, 935, 2048, 89);
+    // Rough coastline
+    for (let x = 0; x < 2048; x += 32) {
+      const h = Math.sin(x * 0.03) * 24 + Math.random() * 18;
+      ctx.fillRect(x, 920 - h, 36, h + 20);
+    }
+
+    // Arctic Sea Ice
+    ctx.fillRect(0, 0, 2048, 42);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -598,73 +828,106 @@ class SceneManager {
   }
 
   createEarthNightTexture() {
+    // NASA Black Marble: Urban electric city lighting clusters with incandescent glow
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
+    canvas.width = 2048;
+    canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
+    // Deep void black night side
     ctx.fillStyle = '#010204';
-    ctx.fillRect(0, 0, 1024, 512);
+    ctx.fillRect(0, 0, 2048, 1024);
 
-    // Urban City Light Clusters (Golden-Amber points)
-    const addCityCluster = (cx, cy, count, spread) => {
+    const addCityCluster = (cx, cy, count, spread, intensity = 1.0) => {
       for (let i = 0; i < count; i++) {
         const x = cx + (Math.random() - 0.5) * spread;
-        const y = cy + (Math.random() - 0.5) * spread;
-        const r = Math.random() * 1.5 + 0.5;
-        ctx.fillStyle = Math.random() > 0.3 ? '#ffe082' : '#ffb74d';
+        const y = cy + (Math.random() - 0.5) * (spread * 0.75);
+        const r = Math.random() * 2.2 + 0.6;
+        ctx.fillStyle = Math.random() > 0.35 ? '#ffe28a' : '#ffb347';
+        ctx.globalAlpha = (Math.random() * 0.5 + 0.5) * intensity;
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();
       }
+      // Core urban bloom
+      const bloomGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, spread * 0.4);
+      bloomGrad.addColorStop(0, 'rgba(255, 210, 110, 0.45)');
+      bloomGrad.addColorStop(1, 'rgba(255, 170, 50, 0.0)');
+      ctx.fillStyle = bloomGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, spread * 0.4, 0, Math.PI * 2);
+      ctx.fill();
     };
 
-    // North America East/West Coast
-    addCityCluster(260, 170, 150, 45);
-    addCityCluster(320, 170, 200, 50);
-    // Western Europe
-    addCityCluster(530, 155, 320, 40);
-    // East Asia (Japan, Eastern China)
-    addCityCluster(780, 185, 350, 60);
-    // India & Nile River
-    addCityCluster(680, 220, 180, 35);
-    addCityCluster(565, 200, 90, 20);
+    // North America (Bos-Wash Megalopolis, Chicago, West Coast, Texas)
+    addCityCluster(640, 360, 280, 85, 1.0); // US East Coast
+    addCityCluster(580, 365, 160, 60, 0.9); // Chicago & Midwest
+    addCityCluster(470, 370, 140, 50, 0.85); // California (LA, SF)
+    addCityCluster(570, 420, 110, 55, 0.8); // Texas Triangle
 
+    // Western Europe Megalopolis (London, Paris, Benelux, Ruhr, Milan)
+    addCityCluster(1060, 310, 380, 75, 1.0);
+    addCityCluster(1090, 335, 180, 50, 0.9); // Italy & Mediterranean
+
+    // East Asia (Tokyo-Osaka corridor, Beijing, Shanghai, Pearl River Delta, Seoul)
+    addCityCluster(1600, 375, 340, 60, 1.0); // Japan Tokaido corridor
+    addCityCluster(1520, 360, 220, 65, 0.95); // Beijing / Tianjin
+    addCityCluster(1540, 420, 260, 65, 1.0); // Shanghai / Yangtze Delta
+    addCityCluster(1500, 470, 240, 55, 0.95); // Guangzhou / Hong Kong
+    addCityCluster(1545, 365, 110, 30, 0.9); // Seoul
+
+    // Indian Subcontinent (Ganges River corridor, Mumbai, Delhi, Bengaluru)
+    addCityCluster(1360, 460, 260, 75, 0.95); // Northern India
+    addCityCluster(1330, 510, 180, 50, 0.9); // Mumbai / Western Coast
+    addCityCluster(1360, 540, 140, 50, 0.85); // Bengaluru / South India
+
+    // Nile River & Delta ribbon of golden lights
+    for (let ny = 450; ny < 520; ny += 6) {
+      addCityCluster(1185, ny, 12, 12, 0.85);
+    }
+    addCityCluster(1185, 435, 90, 25, 0.95); // Nile Delta & Cairo
+
+    ctx.globalAlpha = 1.0;
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
     return tex;
   }
 
   createEarthSpecTexture() {
+    // NASA Specular Ocean Mask: Water is reflective (white), land is matte (black)
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
+    canvas.width = 2048;
+    canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
-    // Oceans are highly specular (white), land is matte (black)
+    // Oceans are pure reflective white
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, 1024, 512);
+    ctx.fillRect(0, 0, 2048, 1024);
 
-    // Mask out continents with black
-    ctx.fillStyle = '#000000';
-    ctx.beginPath();
-    ctx.ellipse(280, 180, 80, 60, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(340, 320, 60, 90, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(540, 160, 60, 45, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(550, 270, 70, 80, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(720, 170, 110, 75, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(820, 350, 45, 35, 0.2, 0, Math.PI * 2);
-    ctx.fill();
+    // Mask out landmasses with pure matte black
+    const maskLand = (cx, cy, rx, ry) => {
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    maskLand(560, 340, 175, 120);
+    maskLand(620, 380, 125, 80);
+    maskLand(720, 580, 120, 95);
+    maskLand(730, 710, 85, 135);
+    maskLand(1080, 310, 115, 85);
+    maskLand(1120, 450, 160, 80);
+    maskLand(1130, 590, 125, 115);
+    maskLand(1440, 290, 245, 115);
+    maskLand(1520, 380, 145, 100);
+    maskLand(1360, 520, 80, 85);
+    maskLand(1680, 715, 120, 90);
+
+    // Polar ice has moderate specular reflection
+    ctx.fillStyle = '#444444';
+    ctx.fillRect(0, 930, 2048, 94);
+    ctx.fillRect(0, 0, 2048, 40);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -672,24 +935,173 @@ class SceneManager {
   }
 
   createEarthCloudsTexture() {
+    // Dynamic Swirling Storm Systems & ITCZ Tropical Cloud Bands
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
+    canvas.width = 2048;
+    canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
-    ctx.clearRect(0, 0, 1024, 512);
+    ctx.clearRect(0, 0, 2048, 1024);
 
-    // Swirling white clouds
-    for (let i = 0; i < 400; i++) {
-      const x = Math.random() * 1024;
-      const y = Math.random() * 400 + 56;
-      const rx = Math.random() * 40 + 15;
-      const ry = Math.random() * 15 + 5;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    // ITCZ Convective Equatorial Cloud Clusters
+    for (let i = 0; i < 280; i++) {
+      const x = Math.random() * 2048;
+      const y = 512 + (Math.random() - 0.5) * 110;
+      const rx = Math.random() * 45 + 15;
+      const ry = Math.random() * 18 + 6;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
       ctx.beginPath();
-      ctx.ellipse(x, y, rx, ry, Math.sin(x * 0.01) * 0.4, 0, Math.PI * 2);
+      ctx.ellipse(x, y, rx, ry, (Math.random() - 0.5) * 0.2, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    // Swirling Mid-Latitude Cyclonic Storms (North & South Hemispheres)
+    const drawCyclone = (cx, cy, radius, arms = 3, spin = 1) => {
+      for (let a = 0; a < arms; a++) {
+        const startAngle = (a / arms) * Math.PI * 2;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.48)';
+        ctx.lineWidth = 14;
+        ctx.beginPath();
+        for (let t = 0; t < 2.5; t += 0.08) {
+          const r = (t / 2.5) * radius;
+          const theta = startAngle + t * spin * 2.2;
+          const x = cx + Math.cos(theta) * r;
+          const y = cy + Math.sin(theta) * (r * 0.65);
+          if (t === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      // Eye of the storm
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    drawCyclone(480, 320, 110, 3, 1); // North Pacific Storm
+    drawCyclone(920, 280, 130, 3, 1); // North Atlantic Storm
+    drawCyclone(1750, 340, 100, 3, 1); // West Pacific Typhoon
+    drawCyclone(680, 780, 120, 3, -1); // Southern Ocean Storm
+    drawCyclone(1380, 800, 140, 3, -1); // South Indian Ocean Cyclone
+
+    // Wispy high altitude cirrus sheets
+    for (let i = 0; i < 400; i++) {
+      const x = Math.random() * 2048;
+      const y = Math.random() * 880 + 72;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+      ctx.beginPath();
+      ctx.ellipse(x, y, Math.random() * 55 + 20, Math.random() * 12 + 4, Math.random() * 0.5 - 0.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createMoonTexture() {
+    // NASA Lunar Reconnaissance Orbiter (LRO): Basaltic dark maria vs anorthosite highlands, Tycho rays
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    // Highly cratered bright anorthositic highlands base
+    ctx.fillStyle = '#8c8a86';
+    ctx.fillRect(0, 0, 2048, 1024);
+
+    // Highland textural micro-cratering
+    for (let i = 0; i < 4000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(175, 172, 168, 0.15)' : 'rgba(90, 88, 85, 0.18)';
+      ctx.fillRect(Math.random() * 2048, Math.random() * 1024, Math.random() * 10 + 2, Math.random() * 10 + 2);
+    }
+
+    // Basaltic Lunar Maria (Dark Lowlands)
+    const drawMare = (cx, cy, rx, ry, col = '#302e2b', roughCount = 25) => {
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (let i = 0; i < roughCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * (rx * 0.75);
+        const r = Math.random() * (rx * 0.5) + 6;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    // Oceanus Procellarum (Vast dark western plain)
+    drawMare(680, 480, 160, 210, '#2b2926', 45);
+    // Mare Imbrium (Circular basin)
+    drawMare(820, 360, 120, 110, '#262422', 35);
+    // Mare Serenitatis
+    drawMare(1020, 370, 85, 80, '#282624', 25);
+    // Mare Tranquillitatis (Apollo 11 landing site!)
+    drawMare(1080, 470, 95, 85, '#262523', 30);
+    // Mare Crisium (Isolated circular dark basin)
+    drawMare(1250, 410, 60, 55, '#22211f', 20);
+    // Mare Fecunditatis & Mare Nectaris
+    drawMare(1180, 560, 75, 70, '#2c2a27', 20);
+    drawMare(1090, 590, 50, 45, '#2e2c29', 15);
+
+    // Ancient Crater Pits across highlands
+    for (let i = 0; i < 320; i++) {
+      const x = Math.random() * 2048;
+      const y = Math.random() * 1024;
+      const r = Math.random() * 18 + 4;
+
+      ctx.fillStyle = '#22211f';
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#c0bdb7';
+      ctx.lineWidth = Math.max(1, r * 0.22);
+      ctx.beginPath();
+      ctx.arc(x - r * 0.15, y - r * 0.15, r * 0.95, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Tycho Crater & Magnificent Radial Ejecta Ray System
+    const tychoX = 1040;
+    const tychoY = 780;
+    for (let r = 0; r < 40; r++) {
+      const angle = (r / 40) * Math.PI * 2 + (Math.random() - 0.5) * 0.06;
+      const rayLen = 220 + Math.random() * 450;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.42)';
+      ctx.lineWidth = Math.random() * 3.5 + 1.2;
+      ctx.beginPath();
+      ctx.moveTo(tychoX, tychoY);
+      ctx.lineTo(tychoX + Math.cos(angle) * rayLen, tychoY + Math.sin(angle) * rayLen);
+      ctx.stroke();
+    }
+    // Tycho high-albedo crater core
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(tychoX, tychoY, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Copernicus Crater in Mare Imbrium
+    const copX = 810;
+    const copY = 440;
+    for (let r = 0; r < 24; r++) {
+      const angle = (r / 24) * Math.PI * 2;
+      const rayLen = 80 + Math.random() * 140;
+      ctx.strokeStyle = 'rgba(245, 245, 245, 0.35)';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(copX, copY);
+      ctx.lineTo(copX + Math.cos(angle) * rayLen, copY + Math.sin(angle) * rayLen);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#f8f8f8';
+    ctx.beginPath();
+    ctx.arc(copX, copY, 14, 0, Math.PI * 2);
+    ctx.fill();
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -697,35 +1109,230 @@ class SceneManager {
   }
 
   createMarsTexture() {
+    // NASA MRO & Viking Global Mosaic: Hematite dust, Syrtis Major basalt, Olympus Mons, Valles Marineris
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    // Rusty iron oxide ferric dust base
+    ctx.fillStyle = '#b74824';
+    ctx.fillRect(0, 0, 2048, 1024);
+
+    // Subtle desert sand dunes & tonal bands
+    for (let i = 0; i < 3000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(215, 105, 55, 0.15)' : 'rgba(145, 50, 20, 0.15)';
+      ctx.fillRect(Math.random() * 2048, Math.random() * 1024, Math.random() * 24 + 4, Math.random() * 14 + 4);
+    }
+
+    // Dark Volcanic Basalt Provinces
+    const drawBasalt = (cx, cy, rx, ry) => {
+      ctx.fillStyle = '#401e13';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (let i = 0; i < 25; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * (rx * 0.8);
+        const r = Math.random() * (rx * 0.4) + 10;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    // Syrtis Major Planum (Iconic dark triangular volcanic shield)
+    drawBasalt(1460, 510, 130, 95);
+    // Acidalia Planitia (Northern dark lowlands)
+    drawBasalt(860, 330, 150, 85);
+    // Sinus Meridiani & Mare Tyrrhenum
+    drawBasalt(1040, 520, 110, 60);
+    drawBasalt(1650, 640, 140, 75);
+
+    // Olympus Mons (Tallest volcano in Solar System: 21.9 km high, 600 km wide)
+    const olyX = 600;
+    const olyY = 440;
+    const olyR = 65;
+
+    // Basal scarp cliff perimeter
+    ctx.fillStyle = '#823018';
+    ctx.beginPath();
+    ctx.arc(olyX, olyY, olyR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#5a1e0c';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Central Caldera Depression (Multi-ring collapse pits)
+    ctx.fillStyle = '#260b04';
+    ctx.beginPath();
+    ctx.ellipse(olyX - 4, olyY - 2, 18, 14, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Tharsis Montes (Trio of giant shield volcanoes: Arsia, Pavonis, Ascraeus)
+    const tharsis = [
+      { x: 740, y: 550, r: 24 }, // Arsia Mons
+      { x: 790, y: 480, r: 26 }, // Pavonis Mons
+      { x: 840, y: 410, r: 28 }  // Ascraeus Mons
+    ];
+    tharsis.forEach(v => {
+      ctx.fillStyle = '#843219';
+      ctx.beginPath();
+      ctx.arc(v.x, v.y, v.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2e0f06';
+      ctx.beginPath();
+      ctx.arc(v.x, v.y, v.r * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Valles Marineris Grand Canyon Complex (Spanning 4,000 km across the globe)
+    ctx.strokeStyle = '#240d05';
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    ctx.moveTo(710, 560);
+    ctx.bezierCurveTo(860, 580, 980, 550, 1140, 570);
+    ctx.stroke();
+
+    // Branching tributary chasmata (Coprates, Candor, Melas Chasma)
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(850, 575);
+    ctx.lineTo(920, 540);
+    ctx.moveTo(960, 560);
+    ctx.lineTo(1030, 595);
+    ctx.stroke();
+
+    // Hellas Planitia Impact Basin
+    ctx.fillStyle = '#c8704d';
+    ctx.beginPath();
+    ctx.ellipse(1480, 720, 105, 75, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Brilliant White Polar Ice Caps
+    // North Pole (Planum Boreum) - Spiral water/CO2 ice cap
+    ctx.fillStyle = '#fefefe';
+    ctx.fillRect(0, 0, 2048, 38);
+    for (let x = 0; x < 2048; x += 40) {
+      const h = Math.sin(x * 0.04) * 16 + Math.random() * 12;
+      ctx.fillRect(x, 38, 42, h);
+    }
+    // South Pole (Planum Australe)
+    ctx.fillRect(0, 986, 2048, 38);
+    for (let x = 0; x < 2048; x += 45) {
+      const h = Math.sin(x * 0.035) * 14 + Math.random() * 10;
+      ctx.fillRect(x, 986 - h, 48, h);
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createPhobosTexture() {
+    // NASA MRO HiRISE: Dark carbonaceous regolith, Stickney crater and linear fracture grooves
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Rusty iron oxide base
-    ctx.fillStyle = '#b34726';
+    ctx.fillStyle = '#48443e';
     ctx.fillRect(0, 0, 1024, 512);
 
-    // Darker basalt volcanic provinces (Syrtis Major)
-    ctx.fillStyle = '#6e2b17';
-    for (let i = 0; i < 30; i++) {
-      ctx.beginPath();
-      ctx.ellipse(Math.random() * 1024, Math.random() * 300 + 100, Math.random() * 90 + 30, Math.random() * 40 + 15, 0, 0, Math.PI * 2);
-      ctx.fill();
+    for (let i = 0; i < 1200; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#58524a' : '#34302a';
+      ctx.fillRect(Math.random() * 1024, Math.random() * 512, Math.random() * 8 + 2, Math.random() * 8 + 2);
     }
 
-    // Valles Marineris canyon rift
-    ctx.strokeStyle = '#381208';
-    ctx.lineWidth = 6;
+    // Stickney Crater (9 km impact basin dominating Phobos)
+    ctx.fillStyle = '#262420';
     ctx.beginPath();
-    ctx.moveTo(350, 260);
-    ctx.bezierCurveTo(450, 270, 520, 255, 600, 265);
+    ctx.arc(380, 250, 90, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#706a60';
+    ctx.lineWidth = 7;
     ctx.stroke();
 
-    // Polar ice caps
-    ctx.fillStyle = '#f8f4f0';
-    ctx.fillRect(0, 0, 1024, 18);
-    ctx.fillRect(0, 492, 1024, 20);
+    // Linear striation grooves radiating from Stickney
+    ctx.strokeStyle = 'rgba(50, 46, 40, 0.5)';
+    ctx.lineWidth = 2.5;
+    for (let y = 140; y < 380; y += 22) {
+      ctx.beginPath();
+      ctx.moveTo(460, y);
+      ctx.lineTo(880, y + (Math.random() - 0.5) * 20);
+      ctx.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createCeresTexture() {
+    // NASA Dawn Mission: Dark carbonaceous asteroid regolith, Occator Crater Cerealia Facula salt spots
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#423e3a';
+    ctx.fillRect(0, 0, 2048, 1024);
+
+    for (let i = 0; i < 3000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#524e48' : '#2e2a26';
+      ctx.fillRect(Math.random() * 2048, Math.random() * 1024, Math.random() * 12 + 2, Math.random() * 12 + 2);
+    }
+
+    // Impact Craters
+    for (let i = 0; i < 180; i++) {
+      const x = Math.random() * 2048;
+      const y = Math.random() * 1024;
+      const r = Math.random() * 20 + 4;
+      ctx.fillStyle = '#262320';
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#68625a';
+      ctx.lineWidth = Math.max(1, r * 0.2);
+      ctx.stroke();
+    }
+
+    // Occator Crater (92 km crater hosting bright sodium carbonate salt deposits)
+    const occX = 1060;
+    const occY = 480;
+    const occR = 55;
+
+    ctx.fillStyle = '#2b2724';
+    ctx.beginPath();
+    ctx.arc(occX, occY, occR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#5a544c';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Cerealia Facula (Brilliant glowing central sodium carbonate dome)
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(occX, occY, 14, 0, Math.PI * 2);
+    ctx.fill();
+    // Glowing halo
+    const glowGrad = ctx.createRadialGradient(occX, occY, 3, occX, occY, 28);
+    glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+    glowGrad.addColorStop(0.5, 'rgba(215, 240, 255, 0.45)');
+    glowGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath();
+    ctx.arc(occX, occY, 28, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Vinalia Faculae (Secondary bright salt fracture patches nearby)
+    [-18, 16, 22].forEach((offset, idx) => {
+      ctx.fillStyle = '#f8fbff';
+      ctx.beginPath();
+      ctx.arc(occX + offset, occY + (idx - 1) * 12, 5, 0, Math.PI * 2);
+      ctx.fill();
+    });
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -733,43 +1340,293 @@ class SceneManager {
   }
 
   createJupiterTexture() {
+    // NASA Juno & Cassini Composite: High-res alternating Belts and Zones, Great Red Spot, shear eddies
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    // Alternating NASA atmospheric zonal bands
+    const bands = [
+      { y1: 0, y2: 120, col1: '#546a78', col2: '#688090' },     // North Polar Storm Region
+      { y1: 120, y2: 200, col1: '#844c2c', col2: '#965634' },   // North North Temperate Belt (NNTB)
+      { y1: 200, y2: 290, col1: '#f4ebd8', col2: '#fcf6ec' },   // North Tropical Zone (NTrZ)
+      { y1: 290, y2: 440, col1: '#7c3617', col2: '#9a4622' },   // North Equatorial Belt (NEB)
+      { y1: 440, y2: 560, col1: '#f2dfc5', col2: '#f6ebd9' },   // Equatorial Zone (EZ)
+      { y1: 560, y2: 710, col1: '#823a19', col2: '#a44e26' },   // South Equatorial Belt (SEB - GRS region)
+      { y1: 710, y2: 800, col1: '#eddcc5', col2: '#f4ebd8' },   // South Tropical Zone (STrZ)
+      { y1: 800, y2: 890, col1: '#8a4e2e', col2: '#9e5836' },   // South Temperate Belt (STB)
+      { y1: 890, y2: 1024, col1: '#546a78', col2: '#688090' }   // South Polar Storm Region
+    ];
+
+    bands.forEach(b => {
+      const grad = ctx.createLinearGradient(0, b.y1, 0, b.y2);
+      grad.addColorStop(0, b.col1);
+      grad.addColorStop(0.5, b.col2);
+      grad.addColorStop(1, b.col1);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, b.y1, 2048, b.y2 - b.y1);
+    });
+
+    // Equatorial Bluish-Gray Festoon Plumes
+    ctx.strokeStyle = 'rgba(105, 130, 150, 0.45)';
+    ctx.lineWidth = 5;
+    for (let x = 0; x < 2048; x += 110) {
+      ctx.beginPath();
+      ctx.moveTo(x, 440);
+      ctx.bezierCurveTo(x + 35, 480, x + 65, 520, x + 25, 555);
+      ctx.stroke();
+    }
+
+    // Atmospheric Shear Wave Turbulence along band borders
+    for (let i = 0; i < 160; i++) {
+      const y = Math.random() * 920 + 50;
+      ctx.strokeStyle = i % 2 === 0 ? 'rgba(255, 255, 255, 0.25)' : 'rgba(70, 24, 8, 0.28)';
+      ctx.lineWidth = Math.random() * 3 + 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      for (let x = 0; x < 2048; x += 48) {
+        ctx.lineTo(x, y + Math.sin(x * 0.04 + y) * 11);
+      }
+      ctx.stroke();
+    }
+
+    // Anticyclonic White Ovals (Along South Temperate Belt)
+    for (let i = 0; i < 7; i++) {
+      const ox = 260 + i * 270;
+      const oy = 755 + (Math.random() - 0.5) * 20;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(ox, oy, 28, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#caa582';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+
+    // The Great Red Spot (GRS: Anticyclonic Storm persisting for >350 years)
+    const grsX = 1320;
+    const grsY = 645;
+    const grsW = 165;
+    const grsH = 100;
+
+    // Outer white halo collar
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.beginPath();
+    ctx.ellipse(grsX, grsY, grsW * 0.62, grsH * 0.64, 0.04, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dark perimeter rim
+    ctx.fillStyle = '#6e1e0d';
+    ctx.beginPath();
+    ctx.ellipse(grsX, grsY, grsW * 0.55, grsH * 0.55, 0.04, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Deep brick-orange/red vortex core
+    const grsGrad = ctx.createRadialGradient(grsX, grsY, 5, grsX, grsY, grsW * 0.5);
+    grsGrad.addColorStop(0, '#c43418');
+    grsGrad.addColorStop(0.65, '#b02c14');
+    grsGrad.addColorStop(1, '#821a08');
+    ctx.fillStyle = grsGrad;
+    ctx.beginPath();
+    ctx.ellipse(grsX, grsY, grsW * 0.5, grsH * 0.48, 0.04, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Turbulent wake vortices trailing westward behind the GRS
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 3;
+    for (let w = 0; w < 4; w++) {
+      const wx = grsX - 90 - w * 70;
+      const wy = grsY + (w % 2 === 0 ? 15 : -15);
+      ctx.beginPath();
+      ctx.arc(wx, wy, 20 + w * 4, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createIoTexture() {
+    // NASA Galileo/Juno: Volcanic sulfur world ("pizza moon"), Pele and Loki Patera lava lakes
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Alternating zonal cloud bands
-    const bandColors = ['#f4e3c7', '#d89f66', '#a66a38', '#ebd1b2', '#c97d42', '#8c5228', '#f2dcc2'];
-    for (let y = 0; y < 512; y++) {
-      const colorIdx = Math.floor((y / 512) * bandColors.length) % bandColors.length;
-      ctx.fillStyle = bandColors[colorIdx];
-      ctx.fillRect(0, y, 1024, 1);
+    // Cadmium yellow & sulfur orange base
+    ctx.fillStyle = '#ffde38';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    for (let i = 0; i < 1500; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#ff9e18' : '#e0ba24';
+      ctx.fillRect(Math.random() * 1024, Math.random() * 512, Math.random() * 12 + 3, Math.random() * 12 + 3);
     }
 
-    // Swirling turbulence eddies
-    for (let i = 0; i < 80; i++) {
-      const y = Math.random() * 512;
-      ctx.strokeStyle = i % 2 === 0 ? 'rgba(255,255,255,0.25)' : 'rgba(80,30,10,0.3)';
-      ctx.lineWidth = 3;
+    // White SO2 frost patches
+    for (let i = 0; i < 45; i++) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      for (let x = 0; x < 1024; x += 40) {
-        ctx.lineTo(x, y + Math.sin(x * 0.05 + y) * 8);
+      ctx.ellipse(Math.random() * 1024, Math.random() * 512, Math.random() * 30 + 10, Math.random() * 20 + 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Volcanic Calderas & Lava Lakes (Pele, Loki Patera, Prometheus)
+    const calderas = [
+      { x: 280, y: 220, r: 24, redHalo: true }, // Pele with giant red sulfur fallout ring
+      { x: 520, y: 290, r: 32, redHalo: false }, // Loki Patera
+      { x: 740, y: 200, r: 18, redHalo: true },
+      { x: 860, y: 340, r: 22, redHalo: false },
+      { x: 420, y: 390, r: 16, redHalo: true }
+    ];
+
+    calderas.forEach(c => {
+      if (c.redHalo) {
+        ctx.strokeStyle = '#c42408';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.r * 2.2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#180e06'; // Pitch-black silicate lava lake
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createEuropaTexture() {
+    // NASA Galileo: Global water-ice shell, intricate reddish-brown chaos fractures (lineae)
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Pearlescent icy white-blue surface
+    ctx.fillStyle = '#f2f6fa';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    for (let i = 0; i < 800; i++) {
+      ctx.fillStyle = 'rgba(215, 230, 245, 0.45)';
+      ctx.fillRect(Math.random() * 1024, Math.random() * 512, Math.random() * 20 + 4, Math.random() * 10 + 2);
+    }
+
+    // Complex Reddish-Brown Lineae Fracture Network
+    ctx.strokeStyle = 'rgba(122, 58, 30, 0.65)';
+    for (let i = 0; i < 55; i++) {
+      ctx.lineWidth = Math.random() * 4 + 1.2;
+      ctx.beginPath();
+      let x = Math.random() * 1024;
+      let y = Math.random() * 512;
+      ctx.moveTo(x, y);
+      for (let s = 0; s < 6; s++) {
+        x += (Math.random() - 0.5) * 160;
+        y += (Math.random() - 0.5) * 100;
+        ctx.lineTo(x, y);
       }
       ctx.stroke();
     }
 
-    // The Great Red Spot anticyclonic storm oval
-    const grsX = 640;
-    const grsY = 320;
-    ctx.fillStyle = '#b7321a';
-    ctx.beginPath();
-    ctx.ellipse(grsX, grsY, 55, 32, 0.05, 0, Math.PI * 2);
-    ctx.fill();
+    // Lenticulae Chaos Terrain (Dark reddish disrupted ice bergs)
+    for (let i = 0; i < 35; i++) {
+      ctx.fillStyle = 'rgba(140, 68, 36, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(Math.random() * 1024, Math.random() * 512, Math.random() * 22 + 8, Math.random() * 14 + 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
-    ctx.strokeStyle = '#e66848';
-    ctx.lineWidth = 4;
-    ctx.stroke();
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createGanymedeTexture() {
+    // NASA Galileo: Ancient dark cratered regions (Galileo Regio) vs bright grooved terrain (sulci)
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Light grooved terrain base
+    ctx.fillStyle = '#8a8278';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // Ancient Dark Cratered Polygons (Galileo Regio, Marius Regio)
+    const drawRegio = (cx, cy, rx, ry) => {
+      ctx.fillStyle = '#48423c';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    drawRegio(320, 240, 160, 130);
+    drawRegio(750, 310, 180, 140);
+
+    // Tectonic grooved fault lines (Sulci)
+    ctx.strokeStyle = 'rgba(180, 172, 162, 0.45)';
+    ctx.lineWidth = 2.0;
+    for (let y = 80; y < 450; y += 18) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.bezierCurveTo(340, y + 25, 680, y - 25, 1024, y);
+      ctx.stroke();
+    }
+
+    // Bright high-albedo impact craters
+    for (let i = 0; i < 40; i++) {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(Math.random() * 1024, Math.random() * 512, Math.random() * 6 + 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createCallistoTexture() {
+    // NASA Galileo: Ancient saturated ice-rock craters, Valhalla multi-ring basin
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#3a3530';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // Thousands of ancient bright frost-rimmed craters
+    for (let i = 0; i < 600; i++) {
+      const x = Math.random() * 1024;
+      const y = Math.random() * 512;
+      const r = Math.random() * 10 + 2;
+      ctx.fillStyle = '#1e1c1a';
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#c8d4dc';
+      ctx.lineWidth = Math.max(1, r * 0.25);
+      ctx.stroke();
+    }
+
+    // Valhalla Multi-Ring Impact Basin (1,900 km across)
+    const valX = 480;
+    const valY = 240;
+    for (let ring = 25; ring < 160; ring += 18) {
+      ctx.strokeStyle = 'rgba(215, 230, 240, 0.4)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(valX, valY, ring, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(valX, valY, 14, 0, Math.PI * 2);
+    ctx.fill();
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -777,18 +1634,58 @@ class SceneManager {
   }
 
   createSaturnTexture() {
+    // NASA Cassini True-Color: Golden butterscotch pastel bands, North Polar Hexagon storm
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
+    canvas.width = 2048;
+    canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
     // Delicate golden-amber atmospheric stripes
-    const colors = ['#edd6a4', '#d8be8d', '#e8ce9b', '#cbb07c', '#f5e4be'];
-    for (let y = 0; y < 512; y++) {
-      const idx = Math.floor((y / 512) * colors.length);
-      ctx.fillStyle = colors[idx];
-      ctx.fillRect(0, y, 1024, 1);
+    const bands = [
+      { y: 0, col: '#726649' },    // North Polar Hexagon Region
+      { y: 140, col: '#c8aa74' },  // North Temperate Belt
+      { y: 280, col: '#e8d6ab' },  // North Tropical Zone
+      { y: 440, col: '#eddcb8' },  // Equatorial Zone (Brightest)
+      { y: 580, col: '#dcc495' },  // South Equatorial Belt
+      { y: 720, col: '#cbb180' },  // South Temperate Belt
+      { y: 880, col: '#9c845c' },  // South Polar Hood
+      { y: 1024, col: '#7a6744' }
+    ];
+
+    for (let i = 0; i < bands.length - 1; i++) {
+      const grad = ctx.createLinearGradient(0, bands[i].y, 0, bands[i + 1].y);
+      grad.addColorStop(0, bands[i].col);
+      grad.addColorStop(1, bands[i + 1].col);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, bands[i].y, 2048, bands[i + 1].y - bands[i].y);
     }
+
+    // High frequency subtle zonal micro-stripes
+    for (let y = 0; y < 1024; y += 4) {
+      ctx.fillStyle = y % 8 === 0 ? 'rgba(255, 245, 220, 0.08)' : 'rgba(150, 115, 60, 0.08)';
+      ctx.fillRect(0, y, 2048, 4);
+    }
+
+    // The North Polar Hexagon (Discovered by Voyager, mapped by Cassini at ~78°N)
+    const hexY = 70;
+    ctx.strokeStyle = '#94845e';
+    ctx.lineWidth = 7;
+    for (let x = 180; x < 2048; x += 341) {
+      ctx.beginPath();
+      const r = 52;
+      for (let s = 0; s < 6; s++) {
+        const a = (s / 6) * Math.PI * 2;
+        const px = x + Math.cos(a) * r;
+        const py = hexY + Math.sin(a) * (r * 0.45);
+        if (s === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    }
+    // Hexagon central eye
+    ctx.fillStyle = '#5c5035';
+    ctx.fillRect(0, 0, 2048, 40);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -796,24 +1693,135 @@ class SceneManager {
   }
 
   createSaturnRingsTexture() {
+    // NASA Cassini Ring Profile: C-Ring, B-Ring, Cassini Division, A-Ring, Encke Gap, F-Ring
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+
+    const grad = ctx.createLinearGradient(0, 0, 2048, 0);
+    grad.addColorStop(0.00, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.08, 'rgba(140, 122, 100, 0.12)'); // D Ring
+    grad.addColorStop(0.14, 'rgba(165, 145, 120, 0.38)'); // C Ring (Crepe Ring)
+    grad.addColorStop(0.28, 'rgba(195, 175, 140, 0.65)');
+    grad.addColorStop(0.32, 'rgba(235, 215, 170, 0.96)'); // B Ring (Brightest & most dense)
+    grad.addColorStop(0.58, 'rgba(240, 220, 175, 0.98)');
+    grad.addColorStop(0.60, 'rgba(0, 0, 0, 0.02)');       // Cassini Division (4,800 km gap)
+    grad.addColorStop(0.67, 'rgba(0, 0, 0, 0.02)');
+    grad.addColorStop(0.69, 'rgba(205, 185, 150, 0.78)'); // A Ring
+    grad.addColorStop(0.87, 'rgba(195, 175, 140, 0.72)');
+    grad.addColorStop(0.88, 'rgba(0, 0, 0, 0.02)');       // Encke Gap
+    grad.addColorStop(0.90, 'rgba(0, 0, 0, 0.02)');
+    grad.addColorStop(0.92, 'rgba(185, 165, 130, 0.55)');
+    grad.addColorStop(0.95, 'rgba(0, 0, 0, 0)');
+    grad.addColorStop(0.97, 'rgba(180, 160, 125, 0.42)'); // F Ring (Thin shepherd ring)
+    grad.addColorStop(1.00, 'rgba(0,0,0,0)');
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 2048, 64);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    return tex;
+  }
+
+  createTitanTexture() {
+    // NASA Cassini/Huygens: Dense photochemical golden-orange smog atmosphere
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    const grad = ctx.createLinearGradient(0, 0, 0, 512);
+    grad.addColorStop(0, '#bf7218');
+    grad.addColorStop(0.2, '#e89e38');
+    grad.addColorStop(0.5, '#f4ad44');
+    grad.addColorStop(0.8, '#e89e38');
+    grad.addColorStop(1, '#bf7218');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // Subtle dark polar hood
+    ctx.fillStyle = 'rgba(120, 60, 10, 0.35)';
+    ctx.fillRect(0, 0, 1024, 45);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createEnceladusTexture() {
+    // NASA Cassini: Pure brilliant white ice (>0.99 albedo), south polar cyan-blue "tiger stripes"
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#fbfcfe';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // North cratering
+    for (let i = 0; i < 150; i++) {
+      ctx.fillStyle = 'rgba(215, 225, 235, 0.5)';
+      ctx.beginPath();
+      ctx.arc(Math.random() * 1024, Math.random() * 200, Math.random() * 8 + 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // South Polar Cryovolcanic "Tiger Stripe" Fissures (Damascus, Baghdad, Alexandria, Cairo Sulci)
+    ctx.strokeStyle = '#3898b8';
+    ctx.lineWidth = 3.5;
+    [410, 435, 460, 485].forEach(sy => {
+      ctx.beginPath();
+      ctx.moveTo(340, sy);
+      ctx.bezierCurveTo(460, sy + 15, 580, sy - 15, 700, sy);
+      ctx.stroke();
+    });
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createUranusTexture() {
+    // NASA Voyager 2 & JWST: Aquamarine methane absorption, pale collar, rolling 98° tilt
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    const grad = ctx.createLinearGradient(0, 0, 0, 1024);
+    grad.addColorStop(0.0, '#50c4c4');
+    grad.addColorStop(0.2, '#66d2d2');
+    grad.addColorStop(0.5, '#78dede');
+    grad.addColorStop(0.8, '#66d2d2');
+    grad.addColorStop(1.0, '#50c4c4');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 2048, 1024);
+
+    // Pale brighter polar hood
+    ctx.fillStyle = 'rgba(235, 255, 255, 0.18)';
+    ctx.fillRect(0, 0, 2048, 180);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createUranusRingsTexture() {
+    // Narrow dark vertical charcoal rings (Epsilon ring)
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 64;
     const ctx = canvas.getContext('2d');
 
-    // Ring radial density profile from inner (C ring) to outer (A & F ring)
-    // with distinct Cassini Division gap
+    ctx.clearRect(0, 0, 1024, 64);
     const grad = ctx.createLinearGradient(0, 0, 1024, 0);
     grad.addColorStop(0.00, 'rgba(0,0,0,0)');
-    grad.addColorStop(0.12, 'rgba(160, 140, 110, 0.25)'); // C Ring
-    grad.addColorStop(0.32, 'rgba(215, 195, 155, 0.88)'); // B Ring (brightest)
-    grad.addColorStop(0.58, 'rgba(225, 205, 165, 0.95)');
-    grad.addColorStop(0.62, 'rgba(0, 0, 0, 0.02)');       // Cassini Division
-    grad.addColorStop(0.66, 'rgba(0, 0, 0, 0.02)');
-    grad.addColorStop(0.70, 'rgba(195, 175, 140, 0.75)'); // A Ring
-    grad.addColorStop(0.88, 'rgba(180, 160, 130, 0.65)');
-    grad.addColorStop(0.92, 'rgba(0,0,0,0)');             // Encke gap
-    grad.addColorStop(0.97, 'rgba(170, 150, 120, 0.35)'); // F Ring
+    grad.addColorStop(0.35, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.40, 'rgba(70, 85, 95, 0.45)');
+    grad.addColorStop(0.44, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.65, 'rgba(85, 100, 110, 0.6)'); // Epsilon ring
+    grad.addColorStop(0.72, 'rgba(0,0,0,0)');
     grad.addColorStop(1.00, 'rgba(0,0,0,0)');
 
     ctx.fillStyle = grad;
@@ -823,54 +1831,92 @@ class SceneManager {
     return tex;
   }
 
-  createUranusTexture() {
+  createNeptuneTexture() {
+    // NASA Voyager 2: Deep azure cobalt blue, supersonic white cirrus streaks ("Scooter"), Great Dark Spot
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
+    canvas.width = 2048;
+    canvas.height = 1024;
     const ctx = canvas.getContext('2d');
 
-    const grad = ctx.createLinearGradient(0, 0, 0, 512);
-    grad.addColorStop(0, '#5ec7c7');
-    grad.addColorStop(0.5, '#76dede');
-    grad.addColorStop(1, '#5ec7c7');
+    // Deep cobalt azure blue base
+    const grad = ctx.createLinearGradient(0, 0, 0, 1024);
+    grad.addColorStop(0.0, '#1638b8');
+    grad.addColorStop(0.2, '#1e48d4');
+    grad.addColorStop(0.5, '#285ef0');
+    grad.addColorStop(0.8, '#1e48d4');
+    grad.addColorStop(1.0, '#1638b8');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 1024, 512);
+    ctx.fillRect(0, 0, 2048, 1024);
+
+    // Subtle zonal banding
+    for (let y = 0; y < 1024; y += 8) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.fillRect(0, y, 2048, 4);
+    }
+
+    // The Great Dark Spot (Voyager 2 anticyclonic oval storm)
+    const gdsX = 940;
+    const gdsY = 580;
+    ctx.fillStyle = '#0b1e60';
+    ctx.beginPath();
+    ctx.ellipse(gdsX, gdsY, 95, 52, 0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bright white companion cirrus clouds flanking the dark spot
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.beginPath();
+    ctx.ellipse(gdsX - 25, gdsY - 48, 45, 12, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Supersonic Methane Ice Cirrus Clouds ("Scooter" - 2,100 km/h wind shear)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.82)';
+    ctx.lineWidth = 4.5;
+    for (let i = 0; i < 28; i++) {
+      const y = Math.random() * 880 + 72;
+      const startX = Math.random() * 1200;
+      const len = 180 + Math.random() * 380;
+      ctx.beginPath();
+      ctx.moveTo(startX, y);
+      ctx.lineTo(startX + len, y + (Math.random() - 0.5) * 8);
+      ctx.stroke();
+    }
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
     return tex;
   }
 
-  createNeptuneTexture() {
+  createTritonTexture() {
+    // NASA Voyager 2: Retrograde Kuiper capture moon, pinkish nitrogen frost, "cantaloupe terrain"
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Deep azure blue
-    const grad = ctx.createLinearGradient(0, 0, 0, 512);
-    grad.addColorStop(0, '#2448b3');
-    grad.addColorStop(0.5, '#3b6cf0');
-    grad.addColorStop(1, '#2448b3');
-    ctx.fillStyle = grad;
+    // Pinkish-peach nitrogen frost
+    ctx.fillStyle = '#e8c4b8';
     ctx.fillRect(0, 0, 1024, 512);
 
-    // Supersonic white cirrus streaks
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-    ctx.lineWidth = 3;
-    for (let i = 0; i < 20; i++) {
-      const y = Math.random() * 512;
+    // Cantaloupe Terrain (Dimpled cryovolcanic plains)
+    for (let i = 0; i < 600; i++) {
+      ctx.fillStyle = 'rgba(160, 155, 145, 0.35)';
       ctx.beginPath();
-      ctx.moveTo(Math.random() * 300, y);
-      ctx.lineTo(Math.random() * 500 + 400, y + (Math.random() - 0.5) * 6);
-      ctx.stroke();
+      ctx.arc(Math.random() * 1024, Math.random() * 350 + 80, Math.random() * 12 + 4, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    // Great Dark Spot
-    ctx.fillStyle = '#102773';
-    ctx.beginPath();
-    ctx.ellipse(450, 220, 50, 28, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Active Nitrogen Cryovolcanic Geyser Streaks (Black organic fallout blown downwind)
+    ctx.fillStyle = '#2b231f';
+    for (let i = 0; i < 16; i++) {
+      const gx = Math.random() * 900 + 50;
+      const gy = Math.random() * 180 + 300;
+      ctx.beginPath();
+      ctx.moveTo(gx, gy);
+      ctx.lineTo(gx + 60, gy - 8);
+      ctx.lineTo(gx + 65, gy - 4);
+      ctx.closePath();
+      ctx.fill();
+    }
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -878,22 +1924,98 @@ class SceneManager {
   }
 
   createPlutoTexture() {
+    // NASA New Horizons: Tombaugh Regio nitrogen ice heart, Sputnik Planitia, Cthulhu Macula tholins
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    // Dark reddish-ochre upland crust
+    ctx.fillStyle = '#7a422a';
+    ctx.fillRect(0, 0, 2048, 1024);
+
+    // Cthulhu Macula ("The Whale" - pitch black to reddish-brown organic tholin equatorial belt)
+    ctx.fillStyle = '#220904';
+    ctx.fillRect(0, 520, 1100, 160);
+    for (let i = 0; i < 35; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * 1100, 520 + (Math.random() - 0.5) * 120, Math.random() * 50 + 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Northern and eastern cratered uplands
+    for (let i = 0; i < 1800; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#8c4e32' : '#5a2818';
+      ctx.fillRect(Math.random() * 2048, Math.random() * 1024, Math.random() * 16 + 4, Math.random() * 16 + 4);
+    }
+
+    // Tombaugh Regio: The Famous Bright Heart-Shaped Glacier
+    const hx = 1080;
+    const hy = 480;
+
+    // Western Lobe: Sputnik Planitia (1,000 km plain of nitrogen, methane, and CO ices)
+    ctx.fillStyle = '#fef8f0';
+    ctx.beginPath();
+    ctx.moveTo(hx, hy);
+    ctx.bezierCurveTo(hx - 120, hy - 140, hx - 240, hy - 40, hx - 200, hy + 90);
+    ctx.bezierCurveTo(hx - 160, hy + 200, hx - 40, hy + 220, hx, hy + 260);
+    ctx.bezierCurveTo(hx + 40, hy + 220, hx + 160, hy + 200, hx + 200, hy + 90);
+    ctx.bezierCurveTo(hx + 240, hy - 40, hx + 120, hy - 140, hx, hy);
+    ctx.fill();
+
+    // Polygonal Convection Cell Margins in Sputnik Planitia
+    ctx.strokeStyle = 'rgba(215, 195, 180, 0.4)';
+    ctx.lineWidth = 2.0;
+    for (let cellY = hy - 60; cellY < hy + 180; cellY += 35) {
+      for (let cellX = hx - 140; cellX < hx + 140; cellX += 45) {
+        ctx.strokeRect(cellX + (Math.random() - 0.5) * 8, cellY, 40, 30);
+      }
+    }
+
+    // Hillary Montes & Norgay Montes (Rugged water-ice mountain peaks along Sputnik edge)
+    ctx.fillStyle = '#bca696';
+    for (let m = 0; m < 16; m++) {
+      ctx.beginPath();
+      ctx.arc(hx - 180 + (Math.random() - 0.5) * 30, hy + (m - 8) * 20, 14, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  createCharonTexture() {
+    // NASA New Horizons: Dark red Mordor Macula north polar hood, Serenity Chasma rift, cratered plains
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Dark reddish-brown tholins
-    ctx.fillStyle = '#7a4f3b';
+    // Smooth cratered water-ice plains (Vulcan Planitia)
+    ctx.fillStyle = '#9c9892';
     ctx.fillRect(0, 0, 1024, 512);
 
-    // Tombaugh Regio Nitrogen Ice Heart
-    ctx.fillStyle = '#f0e6df';
+    for (let i = 0; i < 800; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#aca7a0' : '#84807a';
+      ctx.fillRect(Math.random() * 1024, Math.random() * 512, Math.random() * 10 + 2, Math.random() * 10 + 2);
+    }
+
+    // Mordor Macula: Striking dark reddish-brown tholin north polar hood
+    ctx.fillStyle = '#632616';
+    ctx.fillRect(0, 0, 1024, 75);
+    for (let x = 0; x < 1024; x += 32) {
+      const h = Math.sin(x * 0.04) * 20 + Math.random() * 16;
+      ctx.fillRect(x, 75, 36, h);
+    }
+
+    // Serenity Chasma: Colossal equatorial tectonic rift canyon splitting Charon
+    ctx.strokeStyle = '#46403a';
+    ctx.lineWidth = 9;
     ctx.beginPath();
-    ctx.moveTo(500, 220);
-    ctx.bezierCurveTo(460, 180, 420, 240, 500, 310);
-    ctx.bezierCurveTo(580, 240, 540, 180, 500, 220);
-    ctx.fill();
+    ctx.moveTo(0, 260);
+    ctx.bezierCurveTo(280, 245, 640, 275, 1024, 255);
+    ctx.stroke();
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -915,7 +2037,7 @@ class SceneManager {
 
     let planetMesh = null;
     let atmosphereMesh = null;
-    let cloudsMesh = null;
+    const moons = [];
 
     if (data.id === 'sun') {
       // Custom GLSL Sun Shader with dynamic solar plasma granulation
@@ -960,9 +2082,7 @@ class SceneManager {
       planetMesh = new THREE.Mesh(earthGeo, earthMat);
       tiltGroup.add(planetMesh);
 
-      // Earth's Moon (Luna)
-      const moonGroup = new THREE.Group();
-      moonGroup.name = 'earth_moon_system';
+      // Earth's Moon (Luna) with LRO basaltic maria & Tycho rays
       const moonGeo = new THREE.SphereGeometry(0.68, 32, 32);
       const moonMat = new THREE.MeshStandardMaterial({
         map: this.sharedTextures.moon,
@@ -970,9 +2090,15 @@ class SceneManager {
         metalness: 0.05
       });
       const moonMesh = new THREE.Mesh(moonGeo, moonMat);
-      moonMesh.position.set(5.5, 0, 0);
-      moonGroup.add(moonMesh);
-      rootGroup.add(moonGroup);
+      rootGroup.add(moonMesh);
+      moons.push({
+        mesh: moonMesh,
+        distance: 5.8,
+        orbitSpeed: 0.55,
+        angle: 0.0,
+        inclination: 0.089, // 5.14 degrees lunar inclination
+        rotSpeed: 0.2
+      });
 
     } else if (data.isProbe) {
       // 3D Procedural Model of Voyager 1 Spacecraft
@@ -980,21 +2106,34 @@ class SceneManager {
       tiltGroup.add(planetMesh);
 
     } else {
-      // Standard Planetary Body with High-Res Texture & Normal Shading
-      const planetGeo = new THREE.SphereGeometry(data.renderRadius, 48, 48);
-      const textureKey = data.id === 'asteroid_belt' ? 'mercury' : data.id;
+      // Standard Planetary Body with NASA-Calibrated Textures & Surface Shading
+      const planetGeo = new THREE.SphereGeometry(data.renderRadius, 64, 64);
+      const textureKey = data.id === 'asteroid_belt' ? 'ceres' : data.id;
       const planetMat = new THREE.MeshStandardMaterial({
         map: this.sharedTextures[textureKey] || this.sharedTextures.mercury,
-        roughness: data.type.includes('Gas') ? 0.45 : 0.85,
-        metalness: 0.1
+        roughness: data.type.includes('Gas') || data.type.includes('Ice') ? 0.45 : 0.85,
+        metalness: 0.08
       });
       planetMesh = new THREE.Mesh(planetGeo, planetMat);
       tiltGroup.add(planetMesh);
     }
 
+    // Real NASA Polar Flattening / Oblateness Factors
+    if (data.id === 'jupiter') {
+      planetMesh.scale.set(1.0, 0.9351, 1.0); // Real NASA oblateness f = 0.06487
+    } else if (data.id === 'saturn') {
+      planetMesh.scale.set(1.0, 0.9020, 1.0); // Real NASA oblateness f = 0.09796 (highest oblateness)
+    } else if (data.id === 'uranus') {
+      planetMesh.scale.set(1.0, 0.9771, 1.0); // Real NASA oblateness f = 0.0229
+    } else if (data.id === 'neptune') {
+      planetMesh.scale.set(1.0, 0.9829, 1.0); // Real NASA oblateness f = 0.0171
+    } else if (data.id === 'asteroid_belt') {
+      planetMesh.scale.set(1.0, 0.9240, 1.0); // Ceres oblate spheroid
+    }
+
     // Atmospheric Rayleigh scattering rim glow
     if (data.hasAtmosphereGlow && data.id !== 'sun') {
-      const atmoGeo = new THREE.SphereGeometry(data.renderRadius * 1.08, 48, 48);
+      const atmoGeo = new THREE.SphereGeometry(data.renderRadius * 1.06, 48, 48);
       const atmoMat = new THREE.ShaderMaterial({
         uniforms: {
           sunPosition: { value: new THREE.Vector3(0, 0, 0) },
@@ -1011,19 +2150,22 @@ class SceneManager {
         depthWrite: false
       });
       atmosphereMesh = new THREE.Mesh(atmoGeo, atmoMat);
+      if (data.id === 'jupiter') atmosphereMesh.scale.set(1.0, 0.9351, 1.0);
+      else if (data.id === 'saturn') atmosphereMesh.scale.set(1.0, 0.9020, 1.0);
+      else if (data.id === 'uranus') atmosphereMesh.scale.set(1.0, 0.9771, 1.0);
+      else if (data.id === 'neptune') atmosphereMesh.scale.set(1.0, 0.9829, 1.0);
       tiltGroup.add(atmosphereMesh);
     }
 
     // Saturn / Uranus Ring Systems
     let ringsMesh = null;
     if (data.hasRings) {
-      const innerR = data.renderRadius * 1.35;
-      const outerR = data.renderRadius * 2.45;
+      const isUranus = data.id === 'uranus';
+      const innerR = isUranus ? data.renderRadius * 1.5 : data.renderRadius * 1.35;
+      const outerR = isUranus ? data.renderRadius * 2.1 : data.renderRadius * 2.45;
       const ringGeo = new THREE.RingGeometry(innerR, outerR, 64);
-      // Align ring horizontally in equatorial plane
       ringGeo.rotateX(-Math.PI / 2);
 
-      // Map UV radially
       const pos = ringGeo.attributes.position;
       const uvs = ringGeo.attributes.uv;
       for (let i = 0; i < pos.count; i++) {
@@ -1034,9 +2176,10 @@ class SceneManager {
         uvs.setXY(i, u, 0.5);
       }
 
+      const ringTex = isUranus ? this.sharedTextures.uranusRings : this.sharedTextures.saturnRings;
       const ringMat = new THREE.ShaderMaterial({
         uniforms: {
-          ringTexture: { value: this.sharedTextures.saturnRings },
+          ringTexture: { value: ringTex },
           sunPosition: { value: new THREE.Vector3(0, 0, 0) },
           planetCenter: { value: new THREE.Vector3(0, 0, 0) },
           planetRadius: { value: data.renderRadius }
@@ -1050,40 +2193,84 @@ class SceneManager {
 
       ringsMesh = new THREE.Mesh(ringGeo, ringMat);
       tiltGroup.add(ringsMesh);
-
-      // Saturn Moons: Titan & Enceladus
-      if (data.id === 'saturn') {
-        const titanGroup = new THREE.Group();
-        titanGroup.name = 'saturn_titan_system';
-        const titanGeo = new THREE.SphereGeometry(0.75, 24, 24);
-        const titanMat = new THREE.MeshStandardMaterial({
-          map: this.sharedTextures.venus,
-          roughness: 0.9
-        });
-        const titanMesh = new THREE.Mesh(titanGeo, titanMat);
-        titanMesh.position.set(13.5, 0, 0);
-        titanGroup.add(titanMesh);
-        rootGroup.add(titanGroup);
-      }
     }
 
-    // Jupiter Galilean Moons (Io, Europa, Ganymede, Callisto)
+    // Moons for each planetary system (NASA-Accurate)
+    if (data.id === 'mars') {
+      // Phobos (Non-spherical triaxial ellipsoid with Stickney Crater)
+      const phobosGeo = new THREE.DodecahedronGeometry(0.24, 2);
+      const phobosMat = new THREE.MeshStandardMaterial({ map: this.sharedTextures.phobos, roughness: 0.95 });
+      const phobosMesh = new THREE.Mesh(phobosGeo, phobosMat);
+      phobosMesh.scale.set(1.3, 1.0, 0.8);
+      rootGroup.add(phobosMesh);
+      moons.push({ mesh: phobosMesh, distance: 2.8, orbitSpeed: 1.4, angle: 0.4, inclination: 0.02, rotSpeed: 0.8 });
+
+      // Deimos (Smaller irregular body)
+      const deimosGeo = new THREE.DodecahedronGeometry(0.16, 1);
+      const deimosMesh = new THREE.Mesh(deimosGeo, phobosMat);
+      deimosMesh.scale.set(1.1, 0.9, 0.7);
+      rootGroup.add(deimosMesh);
+      moons.push({ mesh: deimosMesh, distance: 4.6, orbitSpeed: 0.65, angle: 2.1, inclination: 0.03, rotSpeed: 0.4 });
+    }
+
     if (data.id === 'jupiter') {
-      const galileanGroup = new THREE.Group();
-      galileanGroup.name = 'galilean_moons';
-      const moonDistances = [8.5, 11.2, 14.5, 18.0];
-      const moonSizes = [0.55, 0.5, 0.8, 0.72];
-      moonDistances.forEach((d, idx) => {
-        const mGeo = new THREE.SphereGeometry(moonSizes[idx], 16, 16);
-        const mMat = new THREE.MeshStandardMaterial({ color: idx === 0 ? 0xffcc33 : 0xdddddd, roughness: 0.8 });
+      // Galilean Moons (Io, Europa, Ganymede, Callisto)
+      const galileanMoons = [
+        { name: 'Io', r: 0.52, d: 8.5, tex: this.sharedTextures.io, speed: 0.95, inc: 0.005 },
+        { name: 'Europa', r: 0.44, d: 11.2, tex: this.sharedTextures.europa, speed: 0.70, inc: 0.008 },
+        { name: 'Ganymede', r: 0.74, d: 14.8, tex: this.sharedTextures.ganymede, speed: 0.48, inc: 0.003 },
+        { name: 'Callisto', r: 0.68, d: 18.5, tex: this.sharedTextures.callisto, speed: 0.32, inc: 0.004 }
+      ];
+      galileanMoons.forEach((mSpec, idx) => {
+        const mGeo = new THREE.SphereGeometry(mSpec.r, 24, 24);
+        const mMat = new THREE.MeshStandardMaterial({ map: mSpec.tex, roughness: 0.85, metalness: 0.05 });
         const mMesh = new THREE.Mesh(mGeo, mMat);
-        mMesh.position.set(d, 0, 0);
-        const mOrbit = new THREE.Group();
-        mOrbit.rotation.y = (idx * Math.PI) / 2;
-        mOrbit.add(mMesh);
-        galileanGroup.add(mOrbit);
+        rootGroup.add(mMesh);
+        moons.push({ mesh: mMesh, distance: mSpec.d, orbitSpeed: mSpec.speed, angle: idx * 1.57, inclination: mSpec.inc, rotSpeed: 0.3 });
       });
-      rootGroup.add(galileanGroup);
+    }
+
+    if (data.id === 'saturn') {
+      // Titan (Dense orange smog atmosphere)
+      const titanGeo = new THREE.SphereGeometry(0.72, 24, 24);
+      const titanMat = new THREE.MeshStandardMaterial({ map: this.sharedTextures.titan, roughness: 0.9, metalness: 0.05 });
+      const titanMesh = new THREE.Mesh(titanGeo, titanMat);
+      rootGroup.add(titanMesh);
+      moons.push({ mesh: titanMesh, distance: 14.0, orbitSpeed: 0.38, angle: 0.8, inclination: 0.06, rotSpeed: 0.2 });
+
+      // Enceladus (Pure white ice with south polar tiger stripes)
+      const encGeo = new THREE.SphereGeometry(0.30, 20, 20);
+      const encMat = new THREE.MeshStandardMaterial({ map: this.sharedTextures.enceladus, roughness: 0.5, metalness: 0.1 });
+      const encMesh = new THREE.Mesh(encGeo, encMat);
+      rootGroup.add(encMesh);
+      moons.push({ mesh: encMesh, distance: 8.4, orbitSpeed: 0.75, angle: 3.2, inclination: 0.002, rotSpeed: 0.5 });
+    }
+
+    if (data.id === 'uranus') {
+      // Titania & Miranda
+      const titaniaGeo = new THREE.SphereGeometry(0.42, 20, 20);
+      const titaniaMat = new THREE.MeshStandardMaterial({ map: this.sharedTextures.moon, roughness: 0.9 });
+      const titaniaMesh = new THREE.Mesh(titaniaGeo, titaniaMat);
+      rootGroup.add(titaniaMesh);
+      moons.push({ mesh: titaniaMesh, distance: 7.8, orbitSpeed: 0.45, angle: 1.1, inclination: tiltRad, rotSpeed: 0.3 });
+    }
+
+    if (data.id === 'neptune') {
+      // Triton (Captured retrograde Kuiper moon)
+      const tritonGeo = new THREE.SphereGeometry(0.54, 24, 24);
+      const tritonMat = new THREE.MeshStandardMaterial({ map: this.sharedTextures.triton, roughness: 0.85 });
+      const tritonMesh = new THREE.Mesh(tritonGeo, tritonMat);
+      rootGroup.add(tritonMesh);
+      moons.push({ mesh: tritonMesh, distance: 7.2, orbitSpeed: -0.45, angle: 0.5, inclination: 2.74, rotSpeed: -0.3 });
+    }
+
+    if (data.id === 'pluto') {
+      // Charon (Binary Dwarf Planet Companion with Mordor Macula)
+      const charonGeo = new THREE.SphereGeometry(0.52, 24, 24);
+      const charonMat = new THREE.MeshStandardMaterial({ map: this.sharedTextures.charon, roughness: 0.88, metalness: 0.05 });
+      const charonMesh = new THREE.Mesh(charonGeo, charonMat);
+      rootGroup.add(charonMesh);
+      moons.push({ mesh: charonMesh, distance: 3.8, orbitSpeed: 0.52, angle: 0.0, inclination: 0.0, rotSpeed: 0.52 });
     }
 
     return {
@@ -1093,6 +2280,7 @@ class SceneManager {
       planetMesh: planetMesh,
       atmosphereMesh: atmosphereMesh,
       ringsMesh: ringsMesh,
+      moons: moons,
       heliocentricPos: new THREE.Vector3(),
       lineWisePos: new THREE.Vector3(data.lineDistance, 0, 0),
       currentPos: new THREE.Vector3(data.lineDistance, 0, 0)
@@ -1444,6 +2632,22 @@ class SceneManager {
       }
       if (d.id === 'earth' && body.planetMesh.material.uniforms) {
         body.planetMesh.material.uniforms.cloudTime.value = t;
+      }
+
+      // 5. Update Orbiting Moons in Keplerian Motion
+      if (body.moons && body.moons.length > 0) {
+        body.moons.forEach(m => {
+          if (!this.isPaused) {
+            m.angle += m.orbitSpeed * delta * (this.timeWarp * 0.1);
+          }
+          const inc = m.inclination || 0;
+          const x = Math.cos(m.angle) * m.distance;
+          const z = Math.sin(m.angle) * m.distance * Math.cos(inc);
+          const y = Math.sin(m.angle) * m.distance * Math.sin(inc);
+          m.mesh.position.set(x, y, z);
+          m.mesh.rotation.y += m.rotSpeed * delta;
+          m.mesh.visible = this.showMoons;
+        });
       }
     });
 
