@@ -28,6 +28,7 @@ class SceneManager {
     this.shipSpeed = 1.0;
     this.warpRings = [];
     this.ringScore = 0;
+    this.shieldIntegrity = 100.0;
     this.keys = {};
 
     // Mouse tracking for camera parallax
@@ -42,7 +43,8 @@ class SceneManager {
       canvas: this.canvas,
       antialias: true,
       powerPreference: 'high-performance',
-      alpha: false
+      alpha: false,
+      preserveDrawingBuffer: true
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -92,8 +94,10 @@ class SceneManager {
     window.addEventListener('keydown', (e) => this.onKeyDown(e));
     window.addEventListener('keyup', (e) => this.onKeyUp(e));
     window.addEventListener('pointerdown', (e) => {
-      if (this.currentAct === 4 && e.target.id === 'webgl-canvas') {
-        this.fireLasers();
+      if (this.currentAct === 4) {
+        if (!e.target.closest('button, input, #terminal-modal, #sound-lab-modal, #codex-modal, .act-nav-item, nav, aside, footer, header')) {
+          this.fireLasers();
+        }
       }
     });
 
@@ -1155,6 +1159,11 @@ class SceneManager {
       };
       window.voiceNarrator.speak(commentaries[actNumber], true);
     }
+
+    // Synchronize HUD state and telemetry
+    if (window.hudManager && typeof window.hudManager.updateNavHighlight === 'function') {
+      window.hudManager.updateNavHighlight(actNumber);
+    }
   }
 
   triggerWarpFlash() {
@@ -1175,6 +1184,8 @@ class SceneManager {
     } else {
       this.controls.enabled = false;
     }
+    const directorBtns = document.querySelectorAll('.director-btn');
+    directorBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-cam') === mode));
   }
 
   setLightingPreset(mode) {
@@ -1422,6 +1433,7 @@ class SceneManager {
           if (distToShip < 1.8) {
             // Collision event!
             debris.position.z = -300;
+            this.shieldIntegrity = Math.max(8.0, this.shieldIntegrity - 18.0);
             if (window.audioEngine) window.audioEngine.playSubImpact();
             // Screen shake
             this.camera.position.x += (Math.random() - 0.5) * 0.8;
@@ -1433,6 +1445,11 @@ class SceneManager {
             debris.position.y = (Math.random() - 0.5) * 8;
           }
         });
+      }
+
+      // Passive Shield Harmonic Regeneration
+      if (this.shieldIntegrity < 100.0) {
+        this.shieldIntegrity = Math.min(100.0, this.shieldIntegrity + delta * 4.5);
       }
 
       // Update Laser Projectiles & Check Hits on Debris

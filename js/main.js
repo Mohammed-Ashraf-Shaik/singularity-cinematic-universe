@@ -16,18 +16,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Scene Manager
   const sceneManager = new SceneManager(canvas);
+  window.sceneManager = sceneManager;
 
   // Initialize Holo Terminal
   const holoTerminal = new HoloTerminal(sceneManager);
+  window.holoTerminal = holoTerminal;
 
   // Initialize HUD Manager
   const hudManager = new HUDManager(sceneManager, holoTerminal);
+  window.hudManager = hudManager;
 
   // Engage Reactor / Boot Audio & Visuals
   const engageExperience = async () => {
     // Fade out bootstrap modal immediately
     if (initModal) {
       initModal.classList.add('hidden');
+      setTimeout(() => {
+        initModal.style.display = 'none';
+      }, 420);
     }
 
     if (window.audioEngine) {

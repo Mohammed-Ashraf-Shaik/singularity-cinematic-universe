@@ -61,7 +61,7 @@
           </div>
           <div class="spec-item">
             DIMENSIONAL ACTS
-            <span>5 CINEMATIC WORLDS</span>
+            <span>9 CINEMATIC WORLDS</span>
           </div>
         </div>
       </div>
@@ -87,7 +87,7 @@
         <div class="top-telemetry-metrics">
           <div class="metric-item">
             <span class="metric-unit">EARTH DATE: </span>
-            <span class="metric-val">2026.09.21</span>
+            <span id="earth-date-val" class="metric-val">2026.09.21</span>
           </div>
           <div class="metric-item">
             <span class="metric-unit">TIME DILATION: </span>
@@ -100,9 +100,10 @@
         </div>
 
         <div class="top-quick-actions">
+          <button id="mobile-acts-btn" class="hud-btn mobile-acts-btn" title="Toggle Dimensional Coordinates Act Menu">ACTS [1-9] ▾</button>
           <button id="sound-lab-btn-top" class="hud-btn sound-lab-toggle" style="border-color: var(--color-secondary);" title="Open Audio FX Studio & Kaoss Pad (Key: L)">LAB [L]</button>
           <button id="photo-btn-top" class="hud-btn photo-toggle" style="border-color: var(--color-primary);" title="Capture 4K Wallpaper Screenshot (Key: P)">PHOTO [P]</button>
-          <button id="aspect-btn" class="hud-btn" title="Toggle Cinemascope 2.39:1 / 16:9 Letterboxing">16:9 IMAX</button>
+          <button id="aspect-btn" class="hud-btn" title="Toggle Cinemascope 2.39:1 / 16:9 Letterboxing">16:9 FULL</button>
           <button id="hide-hud-btn" class="hud-btn" title="Toggle HUD Display (Key: H)">HUD [H]</button>
           <button id="fullscreen-btn" class="hud-btn" title="Toggle Fullscreen (Key: F)">⛶</button>
         </div>
@@ -187,18 +188,18 @@
         <div class="telemetry-card">
           <div class="card-header">
             <span>SHIELD INTEGRITY</span>
-            <span>98.4%</span>
+            <span id="shield-val">100.0%</span>
           </div>
           <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" style="width: 98%;"></div>
+            <div id="shield-bar" class="progress-bar-fill" style="width: 100%;"></div>
           </div>
           <div class="telemetry-row" style="margin-top: 10px;">
             <span>DEFLECTOR FREQ</span>
-            <span style="color: var(--color-primary);">540 THz</span>
+            <span id="deflector-freq-val" style="color: var(--color-primary);">540 THz</span>
           </div>
           <div class="telemetry-row">
             <span>TACHYON LEAKAGE</span>
-            <span style="color: var(--color-success);">0.00%</span>
+            <span id="tachyon-val" style="color: var(--color-success);">0.00%</span>
           </div>
         </div>
       </aside>
@@ -273,33 +274,45 @@
            ================================================================== -->
       <div id="codex-modal">
         <div class="codex-header">
-          <div class="codex-title">STELLAR CODEX // EXOPLANET AETHEL-PRIME</div>
+          <div id="codex-title" class="codex-title">STELLAR CODEX // EXOPLANET AETHEL-PRIME</div>
           <button id="codex-close-btn" class="terminal-close-btn" style="font-size: 20px;">✕</button>
         </div>
+
+        <!-- Codex Planetary Target Selectors -->
+        <div class="codex-tabs-bar">
+          <button class="codex-tab-btn active" data-target="aethel">AETHEL-PRIME</button>
+          <button class="codex-tab-btn" data-target="gargantua">GARGANTUA</button>
+          <button class="codex-tab-btn" data-target="neobabylon">NEO-BABYLON</button>
+          <button class="codex-tab-btn" data-target="dysonsol">DYSON SOL</button>
+          <button class="codex-tab-btn" data-target="stargate">STARGATE</button>
+          <button class="codex-tab-btn" data-target="pulsar">PULSAR</button>
+          <button class="codex-tab-btn" data-target="tesseract">TESSERACT</button>
+        </div>
+
         <div class="codex-grid">
           <div class="codex-preview-box">
-            <img src="assets/exoplanet.jpg" alt="Exoplanet Aethel-Prime" class="codex-img">
+            <img id="codex-img" src="assets/exoplanet.jpg" alt="Exoplanet Aethel-Prime" class="codex-img">
           </div>
           <div class="codex-info">
-            <p>
+            <p id="codex-desc">
               Aethel-Prime is a super-terrestrial world orbiting at the inner rim of the Cygnus Rift. Its bioluminescent tectonic continents resonate with sub-space tachyon frequencies, creating perpetual auroral energy rings.
             </p>
             <div class="codex-metric-grid">
               <div class="codex-metric">
                 <label>MASS</label>
-                <span>2.48 EARTH MASSES</span>
+                <span id="codex-mass">2.48 EARTH MASSES</span>
               </div>
               <div class="codex-metric">
                 <label>SURFACE GRAVITY</label>
-                <span>1.34 G</span>
+                <span id="codex-gravity">1.34 G</span>
               </div>
               <div class="codex-metric">
                 <label>ATMOSPHERE</label>
-                <span>N2 / O2 / XENON</span>
+                <span id="codex-atmosphere">N2 / O2 / XENON</span>
               </div>
               <div class="codex-metric">
                 <label>HABITABILITY</label>
-                <span>CLASS IX HARMONIC</span>
+                <span id="codex-habitability">CLASS IX HARMONIC</span>
               </div>
             </div>
           </div>
@@ -320,6 +333,8 @@
           <button id="sound-lab-close-btn" class="terminal-close-btn" style="font-size: 20px;">✕</button>
         </div>
 
+        <div id="kaoss-readout" class="kaoss-readout">CUTOFF: 20,000 Hz | RESONANCE Q: 1.0</div>
+
         <div class="kaoss-pad-container" id="kaoss-pad">
           <div class="kaoss-crosshair" id="kaoss-crosshair"></div>
           <span class="kaoss-label-y">▲ RESONANCE [Q]</span>
@@ -331,6 +346,8 @@
           <button class="sound-pad-btn" data-sfx="impact">SUB IMPACT</button>
           <button class="sound-pad-btn" data-sfx="warp">WARP JUMP</button>
           <button class="sound-pad-btn" data-sfx="laser">LASER VOLLEY</button>
+          <button class="sound-pad-btn" data-sfx="explosion">EXPLOSION</button>
+          <button class="sound-pad-btn" data-sfx="ping">SCANNER PING</button>
         </div>
 
         <div class="sound-presets-bar">
@@ -342,6 +359,10 @@
       </div>
 
     </div>
+
+    <!-- Floating HUD Unhide Button (active when HUD is hidden) -->
+    <button id="hud-unhide-btn" class="hud-unhide-btn" title="Restore HUD Display (Key: H)">SHOW HUD [H]</button>
+
   </main>
 
   <!-- Local Offline-Capable Libraries -->

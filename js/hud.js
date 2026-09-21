@@ -10,6 +10,7 @@ class HUDManager {
 
     // HUD Elements
     this.hudContainer = document.getElementById('hud-container');
+    this.leftRail = document.querySelector('.hud-left-rail');
     this.spectrumCanvas = document.getElementById('audio-spectrum-canvas');
     this.spectrumCtx = this.spectrumCanvas ? this.spectrumCanvas.getContext('2d') : null;
     this.fpsValueEl = document.getElementById('fps-val');
@@ -20,29 +21,128 @@ class HUDManager {
     this.flightHint = document.getElementById('flight-hint');
     this.codexModal = document.getElementById('codex-modal');
 
+    // Telemetry Gauges
+    this.shieldValEl = document.getElementById('shield-val');
+    this.shieldBarEl = document.getElementById('shield-bar');
+    this.deflectorFreqEl = document.getElementById('deflector-freq-val');
+    this.tachyonLeakEl = document.getElementById('tachyon-val');
+    this.earthDateEl = document.getElementById('earth-date-val');
+
     // Sound Lab & Photo Mode Elements
     this.soundLabModal = document.getElementById('sound-lab-modal');
     this.soundLabBtn = document.getElementById('sound-lab-btn');
     this.soundLabCloseBtn = document.getElementById('sound-lab-close-btn');
     this.kaossPad = document.getElementById('kaoss-pad');
     this.kaossCrosshair = document.getElementById('kaoss-crosshair');
+    this.kaossReadout = document.getElementById('kaoss-readout');
     this.photoBtn = document.getElementById('photo-btn');
     this.photoNotice = document.getElementById('photo-flash-notice');
+    this.mobileActsBtn = document.getElementById('mobile-acts-btn');
     this.isDraggingKaoss = false;
 
-    // Letterbox & Aspect Ratio
-    this.aspectRatioMode = '16:9'; // 'cinemascope', '16:9', '4:3'
+    // Letterbox & Aspect Ratio ('16:9', 'cinemascope', 'imax')
+    this.aspectRatioMode = '16:9';
     this.isHudVisible = true;
 
     // Frame metrics
     this.lastFrameTime = performance.now();
     this.frameCount = 0;
     this.fps = 60;
+    this.lastRenderedScore = 0;
+
+    // Multiverse Codex Planetary Archive Database
+    this.codexData = {
+      aethel: {
+        title: "STELLAR CODEX // EXOPLANET AETHEL-PRIME",
+        img: "assets/exoplanet.jpg",
+        desc: "Aethel-Prime is a super-terrestrial world orbiting at the inner rim of the Cygnus Rift. Its bioluminescent tectonic continents resonate with sub-space tachyon frequencies, creating perpetual auroral energy rings.",
+        mass: "2.48 EARTH MASSES",
+        gravity: "1.34 G",
+        atmosphere: "N2 / O2 / XENON",
+        habitability: "CLASS IX HARMONIC"
+      },
+      gargantua: {
+        title: "STELLAR CODEX // GARGANTUA SINGULARITY",
+        img: "assets/nebula.jpg",
+        desc: "A supermassive rotating Kerr black hole with a relativistic Doppler accretion disk. Extreme gravitational time dilation warps spacetime, causing 1 local hour to equal 7 Earth years.",
+        mass: "100M SOLAR MASSES",
+        gravity: "INF / HORIZON",
+        atmosphere: "RELATIVISTIC PLASMA",
+        habitability: "CLASS 0 // LETHAL"
+      },
+      neobabylon: {
+        title: "STELLAR CODEX // SECTOR 07 NEO-BABYLON",
+        img: "assets/cyberpunk.jpg",
+        desc: "A dense multi-tiered cyberpunk megalopolis encasing tectonic plate 07. Home to 80 billion sentient neural synthetic entities interconnected via quantum lattice networks.",
+        mass: "1.00 EARTH MASS",
+        gravity: "0.98 G",
+        atmosphere: "CH4 / SMOG / NEON",
+        habitability: "CLASS IV INDUSTRIAL"
+      },
+      dysonsol: {
+        title: "STELLAR CODEX // THE DYSON SPHERE SOL",
+        img: "assets/dyson.jpg",
+        desc: "A Type-II Kardashev megastructure enclosing a hyper-energetic G-type main sequence star. Generates 3.84 × 10^26 Watts of coherent tachyon energy beamed across interstellar relays.",
+        mass: "1.989 × 10^30 KG",
+        gravity: "27.9 G (STELLAR)",
+        atmosphere: "CORONAL PLASMA",
+        habitability: "CLASS XII MEGA-CORE"
+      },
+      stargate: {
+        title: "STELLAR CODEX // TACHYON STARGATE",
+        img: "assets/stargate.jpg",
+        desc: "An ancient macro-engineered wormhole ring stabilized by magnetic chevrons. Bridges physical space with parallel multiverse timelines through a resonant event horizon.",
+        mass: "4.2M METRIC TONS",
+        gravity: "ARTIFICIAL 1.0 G",
+        atmosphere: "EXOTIC VACUUM",
+        habitability: "TRANS-DIMENSIONAL"
+      },
+      pulsar: {
+        title: "STELLAR CODEX // PULSAR VOID NURSERY",
+        img: "assets/pulsar.jpg",
+        desc: "A rapidly rotating neutron star spinning at 716 revolutions per second. Relativistic synchrotron plasma jets sweep across the nebula with intense magnetic flux.",
+        mass: "1.44 SOLAR MASSES",
+        gravity: "2.0 × 10^11 G",
+        atmosphere: "SYNCHROTRON FLUX",
+        habitability: "CLASS VII RADIATION"
+      },
+      tesseract: {
+        title: "STELLAR CODEX // 4D TESSERACT PRECURSOR RUINS",
+        img: "assets/monolith.jpg",
+        desc: "An ancient anti-gravity sanctuary of 12 obsidian monoliths surrounding a levitating 4-dimensional hypercube. Emits sub-quantum resonance harmonizing reality itself.",
+        mass: "QUANTUM INDETERMINATE",
+        gravity: "ZERO-G / NEGATIVE",
+        atmosphere: "TACHYON ETHER",
+        habitability: "CLASS 4D TRANSCENDENT"
+      }
+    };
+
+    // Telemetry Specifications per Act
+    this.actTelemetry = {
+      1: { dilation: '+7.24 YR/MIN', velocity: '0.88 C', freq: '540 THz', tachyon: '0.00%' },
+      2: { dilation: '+1.00 SEC/SEC', velocity: '0.12 C', freq: '620 THz', tachyon: '0.04%' },
+      3: { dilation: '10^-43 S', velocity: '0.00 C', freq: '980 THz', tachyon: '0.00%' },
+      4: { dilation: 'VARIABLE', velocity: 'MACH 4500', freq: '720 THz', tachyon: '0.12%' },
+      5: { dilation: '+1.12 YR/MIN', velocity: '0.45 C', freq: '480 THz', tachyon: '0.00%' },
+      6: { dilation: '+0.45 YR/MIN', velocity: '0.30 C', freq: '840 THz', tachyon: '0.01%' },
+      7: { dilation: 'LOOP // INF', velocity: 'TACHYON', freq: '999 THz', tachyon: '4.82%' },
+      8: { dilation: '+14.8 YR/MIN', velocity: '0.94 C', freq: '880 THz', tachyon: '0.05%' },
+      9: { dilation: '4D TESSERACT', velocity: 'NON-LOCAL', freq: '1024 THz', tachyon: '0.00%' }
+    };
 
     this.init();
   }
 
   init() {
+    // 0. Dynamic Earth Date
+    if (this.earthDateEl) {
+      const d = new Date();
+      const yr = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      this.earthDateEl.textContent = `${yr}.${mo}.${day}`;
+    }
+
     // 1. Act Nav Buttons
     const navButtons = document.querySelectorAll('.act-nav-item');
     navButtons.forEach(btn => {
@@ -50,6 +150,9 @@ class HUDManager {
         const actNum = parseInt(btn.getAttribute('data-act'));
         this.sm.setActiveAct(actNum);
         this.updateNavHighlight(actNum);
+        if (this.leftRail && this.leftRail.classList.contains('drawer-open')) {
+          this.leftRail.classList.remove('drawer-open');
+        }
         if (window.audioEngine) window.audioEngine.playHoloBeep(900, 'sine');
       });
     });
@@ -135,10 +238,23 @@ class HUDManager {
     if (codexClose && this.codexModal) {
       codexClose.addEventListener('click', () => {
         this.codexModal.classList.remove('active');
+        if (window.audioEngine) window.audioEngine.playHoloBeep(650, 'sine');
       });
     }
 
-    // 10. Fullscreen Toggle
+    // 10. Codex Planetary Tabs
+    const codexTabs = document.querySelectorAll('.codex-tab-btn');
+    codexTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        codexTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.getAttribute('data-target');
+        this.loadCodexEntry(target);
+        if (window.audioEngine) window.audioEngine.playHoloBeep(1100, 'triangle');
+      });
+    });
+
+    // 11. Fullscreen Toggle
     const fsBtn = document.getElementById('fullscreen-btn');
     if (fsBtn) {
       fsBtn.addEventListener('click', () => {
@@ -146,7 +262,7 @@ class HUDManager {
       });
     }
 
-    // 11. Hide/Show HUD Toggle
+    // 12. Hide/Show HUD Toggle
     const hideHudBtn = document.getElementById('hide-hud-btn');
     if (hideHudBtn) {
       hideHudBtn.addEventListener('click', () => {
@@ -154,7 +270,32 @@ class HUDManager {
       });
     }
 
-    // 12. Sound Lab Toggle Buttons
+    const unhideHudBtn = document.getElementById('hud-unhide-btn');
+    if (unhideHudBtn) {
+      unhideHudBtn.addEventListener('click', () => {
+        this.toggleHUD();
+        if (window.audioEngine) window.audioEngine.playHoloBeep(950, 'sine');
+      });
+    }
+
+    // 13. Mobile Acts Drawer Button
+    if (this.mobileActsBtn && this.leftRail) {
+      this.mobileActsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.leftRail.classList.toggle('drawer-open');
+        if (window.audioEngine) window.audioEngine.playHoloBeep(920, 'sine');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (this.leftRail && this.leftRail.classList.contains('drawer-open')) {
+          if (!e.target.closest('.hud-left-rail') && !e.target.closest('#mobile-acts-btn')) {
+            this.leftRail.classList.remove('drawer-open');
+          }
+        }
+      });
+    }
+
+    // 14. Sound Lab Toggle Buttons
     const soundLabBtns = document.querySelectorAll('#sound-lab-btn, #sound-lab-btn-top, .sound-lab-toggle');
     soundLabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -162,7 +303,7 @@ class HUDManager {
       });
     });
 
-    // 13. Sound Lab Close Button
+    // 15. Sound Lab Close Button
     if (this.soundLabCloseBtn) {
       this.soundLabCloseBtn.addEventListener('click', () => {
         if (this.soundLabModal) this.soundLabModal.classList.remove('active');
@@ -170,7 +311,7 @@ class HUDManager {
       });
     }
 
-    // 14. Holographic Kaoss Pad Pointer Interaction (Cutoff & Resonance Modulation)
+    // 16. Holographic Kaoss Pad Pointer & Touch Interaction
     if (this.kaossPad) {
       const onKaossMove = (e) => {
         if (!this.isDraggingKaoss && e.type !== 'pointerdown') return;
@@ -195,7 +336,7 @@ class HUDManager {
       this.kaossPad.addEventListener('pointercancel', endKaoss);
     }
 
-    // 15. Sound Trigger Grid Buttons
+    // 17. Sound Trigger Grid Buttons
     const soundPads = document.querySelectorAll('.sound-pad-btn');
     soundPads.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -205,12 +346,14 @@ class HUDManager {
         else if (sfx === 'impact') window.audioEngine.playSubImpact();
         else if (sfx === 'warp') window.audioEngine.playWarpJump();
         else if (sfx === 'laser') window.audioEngine.playLaserVolley();
+        else if (sfx === 'explosion') window.audioEngine.playExplosion();
+        else if (sfx === 'ping') window.audioEngine.playScannerPing();
         btn.classList.add('active');
         setTimeout(() => btn.classList.remove('active'), 180);
       });
     });
 
-    // 16. Soundscape Preset Pills
+    // 18. Soundscape Preset Pills
     const presetPills = document.querySelectorAll('.preset-pill');
     presetPills.forEach(pill => {
       pill.addEventListener('click', () => {
@@ -222,7 +365,7 @@ class HUDManager {
       });
     });
 
-    // 17. 4K Cinematic Photo Screenshot Buttons
+    // 19. 4K Cinematic Photo Screenshot Buttons
     const photoBtns = document.querySelectorAll('#photo-btn, #photo-btn-top, .photo-toggle');
     photoBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -230,10 +373,27 @@ class HUDManager {
       });
     });
 
-    // Global Key Shortcuts
+    // 20. Global Key Shortcuts
     window.addEventListener('keydown', (e) => {
       const k = e.key.toLowerCase();
       if (document.activeElement === document.getElementById('terminal-input')) return;
+
+      // Escape key closes modals and drawers
+      if (e.key === 'Escape') {
+        if (this.soundLabModal && this.soundLabModal.classList.contains('active')) {
+          this.soundLabModal.classList.remove('active');
+        }
+        if (this.codexModal && this.codexModal.classList.contains('active')) {
+          this.codexModal.classList.remove('active');
+        }
+        if (this.terminal && this.terminal.isOpen) {
+          this.terminal.toggle();
+        }
+        if (this.leftRail && this.leftRail.classList.contains('drawer-open')) {
+          this.leftRail.classList.remove('drawer-open');
+        }
+        return;
+      }
 
       if (k === 'h') this.toggleHUD();
       else if (k === 'f') this.toggleFullscreen();
@@ -274,10 +434,35 @@ class HUDManager {
     });
   }
 
+  loadCodexEntry(key) {
+    const item = this.codexData[key];
+    if (!item) return;
+
+    const titleEl = document.getElementById('codex-title');
+    const imgEl = document.getElementById('codex-img');
+    const descEl = document.getElementById('codex-desc');
+    const massEl = document.getElementById('codex-mass');
+    const gravEl = document.getElementById('codex-gravity');
+    const atmoEl = document.getElementById('codex-atmosphere');
+    const habEl = document.getElementById('codex-habitability');
+
+    if (titleEl) titleEl.textContent = item.title;
+    if (imgEl) imgEl.src = item.img;
+    if (descEl) descEl.textContent = item.desc;
+    if (massEl) massEl.textContent = item.mass;
+    if (gravEl) gravEl.textContent = item.gravity;
+    if (atmoEl) atmoEl.textContent = item.atmosphere;
+    if (habEl) habEl.textContent = item.habitability;
+  }
+
   toggleHUD() {
     this.isHudVisible = !this.isHudVisible;
     if (this.hudContainer) {
       this.hudContainer.classList.toggle('hud-hidden', !this.isHudVisible);
+    }
+    const unhideBtn = document.getElementById('hud-unhide-btn');
+    if (unhideBtn) {
+      unhideBtn.style.display = this.isHudVisible ? 'none' : 'block';
     }
   }
 
@@ -295,16 +480,16 @@ class HUDManager {
 
     if (this.aspectRatioMode === '16:9') {
       this.aspectRatioMode = 'cinemascope';
-      root.style.setProperty('--letterbox-height', '70px');
+      root.style.setProperty('--letterbox-height', '64px');
       if (aspectBtn) aspectBtn.textContent = '2.39:1 CINEMA';
     } else if (this.aspectRatioMode === 'cinemascope') {
-      this.aspectRatioMode = '4:3';
-      root.style.setProperty('--letterbox-height', '0px');
-      if (aspectBtn) aspectBtn.textContent = '16:9 IMAX';
+      this.aspectRatioMode = 'imax';
+      root.style.setProperty('--letterbox-height', '32px');
+      if (aspectBtn) aspectBtn.textContent = 'IMAX 1.43:1';
     } else {
       this.aspectRatioMode = '16:9';
       root.style.setProperty('--letterbox-height', '0px');
-      if (aspectBtn) aspectBtn.textContent = '16:9 IMAX';
+      if (aspectBtn) aspectBtn.textContent = '16:9 FULL';
     }
   }
 
@@ -327,6 +512,13 @@ class HUDManager {
     if (this.kaossCrosshair) {
       this.kaossCrosshair.style.left = `${x}px`;
       this.kaossCrosshair.style.top = `${y}px`;
+    }
+
+    const freq = Math.round(120 * Math.pow(20000 / 120, Math.max(0, Math.min(1, nx))));
+    const q = (0.5 + Math.max(0, Math.min(1, ny)) * 17.5).toFixed(1);
+
+    if (this.kaossReadout) {
+      this.kaossReadout.textContent = `CUTOFF: ${freq.toLocaleString()} Hz | RESONANCE Q: ${q}`;
     }
 
     if (window.audioEngine && typeof window.audioEngine.setFilterParams === 'function') {
@@ -369,6 +561,14 @@ class HUDManager {
       btn.classList.toggle('active', btnAct === actNum);
     });
 
+    // Update dynamic telemetry metrics per act
+    const telem = this.actTelemetry[actNum];
+    if (telem) {
+      if (this.dilationValEl) this.dilationValEl.textContent = telem.dilation;
+      if (this.deflectorFreqEl) this.deflectorFreqEl.textContent = telem.freq;
+      if (this.tachyonLeakEl) this.tachyonLeakEl.textContent = telem.tachyon;
+    }
+
     // Toggle Flight Simulator Reticle and hints if Act IV
     const isAct4 = (actNum === 4);
     if (this.flightReticle) this.flightReticle.classList.toggle('active', isAct4);
@@ -377,6 +577,7 @@ class HUDManager {
     // If Act 5, open Codex Modal
     if (this.codexModal) {
       this.codexModal.classList.toggle('active', actNum === 5);
+      if (actNum === 5) this.loadCodexEntry('aethel');
     }
   }
 
@@ -398,15 +599,41 @@ class HUDManager {
         const machSpeed = isBoosting ? 9999 : 4500;
         this.warpSpeedEl.textContent = `MACH ${machSpeed}`;
       } else {
-        this.warpSpeedEl.textContent = `0.88 C`;
+        const telem = this.actTelemetry[this.sm.currentAct];
+        this.warpSpeedEl.textContent = telem ? telem.velocity : '0.88 C';
       }
     }
 
     if (this.ringScoreEl) {
-      this.ringScoreEl.textContent = this.sm.ringScore;
+      if (this.sm.ringScore !== this.lastRenderedScore) {
+        this.ringScoreEl.textContent = this.sm.ringScore;
+        this.ringScoreEl.classList.remove('score-pop');
+        void this.ringScoreEl.offsetWidth; // Trigger reflow for animation restart
+        this.ringScoreEl.classList.add('score-pop');
+        this.lastRenderedScore = this.sm.ringScore;
+      }
     }
 
-    // 3. Render Real-Time Audio Spectrum
+    // 3. Update Shield Integrity
+    if (this.shieldValEl && this.sm.shieldIntegrity !== undefined) {
+      const shield = Math.max(0, Math.min(100, this.sm.shieldIntegrity));
+      this.shieldValEl.textContent = `${shield.toFixed(1)}%`;
+      if (this.shieldBarEl) {
+        this.shieldBarEl.style.width = `${shield}%`;
+        this.shieldBarEl.classList.toggle('low-shield', shield < 30);
+      }
+    }
+
+    // 4. Update Dynamic Flight Reticle Tracking in Act IV
+    if (this.flightReticle && this.sm.currentAct === 4 && this.flightReticle.classList.contains('active')) {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const leadX = (this.sm.shipPos.x * 24) + (this.sm.mouse.x * 35);
+      const leadY = (-this.sm.shipPos.y * 20) + (-this.sm.mouse.y * 30);
+      this.flightReticle.style.transform = `translate(calc(-50% + ${leadX.toFixed(1)}px), calc(-50% + ${leadY.toFixed(1)}px))`;
+    }
+
+    // 5. Render Real-Time Audio Spectrum
     this.renderAudioSpectrum();
   }
 
