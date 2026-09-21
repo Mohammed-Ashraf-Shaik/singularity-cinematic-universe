@@ -1,6 +1,5 @@
 /* ==========================================================================
-   PROJECT AETHEL // THE SINGULARITY PROTOCOL
-   Master Application Entry Point & Main Loop
+   SOLAR SYSTEM 3D // MASTER APPLICATION ENTRY POINT & MAIN LOOP
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -26,20 +25,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const hudManager = new HUDManager(sceneManager, holoTerminal);
   window.hudManager = hudManager;
 
-  // Engage Reactor / Boot Audio & Visuals
+  // Engage Simulation / Boot Audio & Visuals
   const engageExperience = async () => {
     // Fade out bootstrap modal immediately
     if (initModal) {
       initModal.classList.add('hidden');
       setTimeout(() => {
         initModal.style.display = 'none';
-      }, 420);
+      }, 450);
     }
 
     if (window.audioEngine) {
       try {
         await window.audioEngine.init();
-        window.audioEngine.playBraaam();
+        window.audioEngine.playPlanetaryRadioWave('earth');
       } catch (err) {
         console.warn('AudioEngine init error:', err);
       }
@@ -48,11 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.voiceNarrator) {
       setTimeout(() => {
         try {
-          window.voiceNarrator.speak("Singularity Protocol engaged. All quantum cores synchronized. Welcome to Project Aethel.", true);
+          window.voiceNarrator.speak("Astrodynamics engine active. Solar System Keplerian simulation engaged. Welcome to the Solar System 3D Explorer.", true);
         } catch (err) {
           console.warn('Voice narrator error:', err);
         }
-      }, 1000);
+      }, 800);
     }
   };
 
@@ -78,5 +77,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   animate();
 
-  console.log('🌌 [Project Aethel] Core systems active and running at 60 FPS.');
+  console.log('☀️ [Solar System 3D] Astrodynamics engine active and running at 60 FPS.');
 });

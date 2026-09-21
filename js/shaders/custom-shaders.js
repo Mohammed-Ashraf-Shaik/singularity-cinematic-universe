@@ -1,458 +1,400 @@
 /* ==========================================================================
-   PROJECT AETHEL // THE SINGULARITY PROTOCOL
-   Custom GLSL Shaders (Black Hole Accretion Disk, Hyperspace Tunnel, Quantum)
+   SOLAR SYSTEM DYNAMICS // ADVANCED GLSL ASTROPHYSICAL SHADERS
+   High-Precision Celestial Shaders: Solar Corona, Planetary Atmospheres,
+   Saturn Ring Shadow Scattering & Earth Multi-Spectral Terminator
    ========================================================================== */
 
 const CustomShaders = {
   // --------------------------------------------------------------------------
-  // 1. BLACK HOLE ACCRETION DISK WITH RELATIVISTIC DOPPLER BEAMING
+  // 1. THE SUN: CHROMOSPHERE GRANULATION & SOLAR FLARE EMISSION
   // --------------------------------------------------------------------------
-  BlackHoleAccretion: {
+  SunSurface: {
     uniforms: {
       time: { value: 0 },
-      innerRadius: { value: 3.2 },
-      outerRadius: { value: 12.0 },
-      coreColor: { value: new THREE.Color(0xff4500) },
-      blueShiftColor: { value: new THREE.Color(0x00f0ff) },
-      redShiftColor: { value: new THREE.Color(0xff0033) },
+      colorCore: { value: new THREE.Color(0xfff5d0) },
+      colorMid: { value: new THREE.Color(0xff8c00) },
+      colorEdge: { value: new THREE.Color(0xd92600) },
+      colorSpot: { value: new THREE.Color(0x3a0900) },
+      granulationScale: { value: 24.0 },
       audioIntensity: { value: 0.0 }
     },
     vertexShader: `
       varying vec2 vUv;
+      varying vec3 vNormal;
       varying vec3 vPosition;
-      varying vec3 vWorldPosition;
+      varying vec3 vViewDir;
 
       void main() {
         vUv = uv;
+        vNormal = normalize(normalMatrix * normal);
         vPosition = position;
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        vViewDir = normalize(-mvPosition.xyz);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 colorCore;
+      uniform vec3 colorMid;
+      uniform vec3 colorEdge;
+      uniform vec3 colorSpot;
+      uniform float granulationScale;
+      uniform float audioIntensity;
+
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec3 vViewDir;
+
+      // 3D Simplex noise approximation
+      vec4 permute(vec4 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+      vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+      float snoise(vec3 v) {
+        const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+
+        vec3 i  = floor(v + dot(v, C.yyy));
+        vec3 x0 = v - i + dot(i, C.xxx);
+
+        vec3 g = step(x0.yzx, x0.xyz);
+        vec3 l = 1.0 - g;
+        vec3 i1 = min(g.xyz, l.zxy);
+        vec3 i2 = max(g.xyz, l.zxy);
+
+        vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+        vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+        vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
+
+        i = mod(i, 289.0);
+        vec4 p = permute(permute(permute(
+                  i.z + vec4(0.0, i1.z, i2.z, 1.0))
+                + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+
+        float n_ = 0.142857142857;
+        vec3  ns = n_ * D.wyz - D.xzx;
+
+        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+
+        vec4 x_ = floor(j * ns.z);
+        vec4 y_ = floor(j - 7.0 * x_);
+
+        vec4 x = x_ *ns.x + ns.yyyy;
+        vec4 y = y_ *ns.x + ns.yyyy;
+        vec4 h = 1.0 - abs(x) - abs(y);
+
+        vec4 b0 = vec4(x.xy, y.xy);
+        vec4 b1 = vec4(x.zw, y.zw);
+
+        vec4 s0 = floor(b0)*2.0 + 1.0;
+        vec4 s1 = floor(b1)*2.0 + 1.0;
+        vec4 sh = -step(h, vec4(0.0));
+
+        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+
+        vec3 p0 = vec3(a0.xy, h.x);
+        vec3 p1 = vec3(a0.zw, h.y);
+        vec3 p2 = vec3(a1.xy, h.z);
+        vec3 p3 = vec3(a1.zw, h.w);
+
+        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+        p0 *= norm.x;
+        p1 *= norm.y;
+        p2 *= norm.z;
+        p3 *= norm.w;
+
+        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+        m = m * m;
+        return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+      }
+
+      float fbm(vec3 p) {
+        float total = 0.0;
+        float amp = 0.5;
+        float freq = 1.0;
+        for (int i = 0; i < 4; i++) {
+          total += snoise(p * freq) * amp;
+          freq *= 2.05;
+          amp *= 0.5;
+        }
+        return total;
+      }
+
+      void main() {
+        vec3 normPos = normalize(vPosition);
+        float t = time * 0.15;
+
+        // Convective granulation flow
+        float n1 = fbm(normPos * granulationScale + vec3(0.0, t, 0.0));
+        float n2 = fbm(normPos * (granulationScale * 2.2) - vec3(t * 0.7, 0.0, t * 0.5));
+        float combinedNoise = (n1 * 0.65 + n2 * 0.35);
+
+        // Astrophysical Eddington Limb Darkening: I(mu) = I0 * (0.4 + 0.6 * mu)
+        float mu = max(dot(vNormal, vViewDir), 0.0);
+        float limbDarkening = 0.35 + 0.65 * pow(mu, 0.6);
+
+        // Solar faculae and magnetic sunspots
+        float spotMask = smoothstep(-0.35, -0.15, combinedNoise);
+        vec3 surfaceColor = mix(colorSpot, colorMid, spotMask);
+        surfaceColor = mix(surfaceColor, colorCore, smoothstep(0.1, 0.5, combinedNoise));
+
+        // Edge emission & audio reactivity
+        surfaceColor = mix(colorEdge, surfaceColor, limbDarkening);
+        surfaceColor += colorCore * (audioIntensity * 0.25);
+
+        gl_FragColor = vec4(surfaceColor * (1.1 + 0.15 * sin(time * 2.0)), 1.0);
+      }
+    `
+  },
+
+  // --------------------------------------------------------------------------
+  // 2. SOLAR CORONA & MAGNETIC PROMINENCE FIELD (ADDITIVE GLOW)
+  // --------------------------------------------------------------------------
+  SunCorona: {
+    uniforms: {
+      time: { value: 0 },
+      coronaColor: { value: new THREE.Color(0xff9922) },
+      audioIntensity: { value: 0.0 }
+    },
+    vertexShader: `
+      varying vec3 vNormal;
+      varying vec3 vViewDir;
+      varying vec3 vWorldPosition;
+
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        vViewDir = normalize(-mvPosition.xyz);
+        vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 coronaColor;
+      uniform float audioIntensity;
+
+      varying vec3 vNormal;
+      varying vec3 vViewDir;
+      varying vec3 vWorldPosition;
+
+      void main() {
+        float fresnel = 1.0 - max(dot(vNormal, vViewDir), 0.0);
+        float pulse = 0.85 + 0.15 * sin(time * 1.8 + vWorldPosition.x * 0.05);
+        float intensity = pow(fresnel, 2.5) * pulse;
+
+        intensity += audioIntensity * 0.3 * pow(fresnel, 1.5);
+        vec3 finalColor = coronaColor * intensity * 1.8;
+        gl_FragColor = vec4(finalColor, intensity * 0.85);
+      }
+    `
+  },
+
+  // --------------------------------------------------------------------------
+  // 3. ATMOSPHERIC RAYLEIGH & MIE SCATTERING SHADER (EARTH, VENUS, MARS, TITAN)
+  // --------------------------------------------------------------------------
+  AtmosphereScattering: {
+    uniforms: {
+      sunPosition: { value: new THREE.Vector3(0, 0, 0) },
+      atmosphereColor: { value: new THREE.Color(0x3388ff) },
+      sunsetTint: { value: new THREE.Color(0xff6622) },
+      glowPower: { value: 3.5 },
+      atmosphereDensity: { value: 1.0 }
+    },
+    vertexShader: `
+      varying vec3 vNormal;
+      varying vec3 vViewDir;
+      varying vec3 vWorldPos;
+
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vWorldPos = worldPos.xyz;
+        vec4 mvPosition = viewMatrix * worldPos;
+        vViewDir = normalize(-mvPosition.xyz);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 sunPosition;
+      uniform vec3 atmosphereColor;
+      uniform vec3 sunsetTint;
+      uniform float glowPower;
+      uniform float atmosphereDensity;
+
+      varying vec3 vNormal;
+      varying vec3 vViewDir;
+      varying vec3 vWorldPos;
+
+      void main() {
+        // Solar vector relative to surface point
+        vec3 lightDir = normalize(sunPosition - vWorldPos);
+        vec3 worldNorm = normalize(vNormal);
+
+        // Rim Fresnel scattering
+        float fresnel = 1.0 - max(dot(vNormal, vViewDir), 0.0);
+        float rimIntensity = pow(fresnel, glowPower) * atmosphereDensity;
+
+        // Illumination factor (day vs night side terminator)
+        float dotLight = dot(worldNorm, lightDir);
+        float dayFactor = clamp(dotLight * 1.4 + 0.25, 0.0, 1.0);
+
+        // Twilight sunset scattering along the day/night terminator
+        float terminator = 1.0 - abs(dotLight);
+        terminator = pow(clamp(terminator, 0.0, 1.0), 4.0);
+
+        vec3 scatteredColor = mix(atmosphereColor, sunsetTint, terminator * 0.7);
+        vec3 finalGlow = scatteredColor * rimIntensity * dayFactor;
+
+        gl_FragColor = vec4(finalGlow, rimIntensity * dayFactor * 0.95);
+      }
+    `
+  },
+
+  // --------------------------------------------------------------------------
+  // 4. SATURN RING SYSTEM WITH ANISOTROPIC SCATTERING & PLANETARY OCCLUSION
+  // --------------------------------------------------------------------------
+  SaturnRings: {
+    uniforms: {
+      ringTexture: { value: null },
+      sunPosition: { value: new THREE.Vector3(0, 0, 0) },
+      planetCenter: { value: new THREE.Vector3(0, 0, 0) },
+      planetRadius: { value: 9.45 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vWorldPosition;
+      varying vec3 vNormal;
+
+      void main() {
+        vUv = uv;
         vec4 worldPos = modelMatrix * vec4(position, 1.0);
         vWorldPosition = worldPos.xyz;
+        vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
         gl_Position = projectionMatrix * viewMatrix * worldPos;
       }
     `,
     fragmentShader: `
-      uniform float time;
-      uniform float innerRadius;
-      uniform float outerRadius;
-      uniform vec3 coreColor;
-      uniform vec3 blueShiftColor;
-      uniform vec3 redShiftColor;
-      uniform float audioIntensity;
+      uniform sampler2D ringTexture;
+      uniform vec3 sunPosition;
+      uniform vec3 planetCenter;
+      uniform float planetRadius;
 
       varying vec2 vUv;
-      varying vec3 vPosition;
       varying vec3 vWorldPosition;
-
-      // Pseudo-random & Noise functions
-      float hash(vec2 p) {
-        p = fract(p * vec2(123.34, 456.21));
-        p += dot(p, p + 45.32);
-        return fract(p.x * p.y);
-      }
-
-      float noise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        float a = hash(i);
-        float b = hash(i + vec2(1.0, 0.0));
-        float c = hash(i + vec2(0.0, 1.0));
-        float d = hash(i + vec2(1.0, 1.0));
-        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-      }
-
-      float fbm(vec2 p) {
-        float v = 0.0;
-        float a = 0.5;
-        vec2 shift = vec2(100.0);
-        for (int i = 0; i < 4; ++i) {
-          v += a * noise(p);
-          p = p * 2.1 + shift;
-          a *= 0.5;
-        }
-        return v;
-      }
+      varying vec3 vNormal;
 
       void main() {
-        // Distance from center on XZ plane
-        float r = length(vPosition.xz);
+        // Sample translucent ring density & coloration
+        vec4 ringTex = texture2D(ringTexture, vUv);
+        if (ringTex.a < 0.02) discard;
 
-        if (r < innerRadius || r > outerRadius) {
-          discard;
+        // Check if ring segment is in Saturn's spherical shadow cast by the Sun
+        vec3 lightDir = normalize(sunPosition - vWorldPosition);
+        vec3 toCenter = planetCenter - vWorldPosition;
+
+        // Closest point from planet center to the sun-light ray
+        float proj = dot(toCenter, lightDir);
+        float shadow = 1.0;
+
+        // If the planet is between the ring point and the Sun
+        if (proj > 0.0) {
+          float distSq = dot(toCenter, toCenter) - (proj * proj);
+          if (distSq < (planetRadius * planetRadius)) {
+            // Soft shadow edge penumbra
+            float dist = sqrt(max(distSq, 0.0));
+            shadow = smoothstep(planetRadius * 0.85, planetRadius * 1.02, dist);
+          }
         }
 
-        // Angle in polar coordinates
-        float theta = atan(vPosition.z, vPosition.x);
+        // Forward & backscattering phase function
+        vec3 viewDir = normalize(cameraPosition - vWorldPosition);
+        float cosTheta = dot(lightDir, viewDir);
+        float phase = 0.75 + 0.25 * (cosTheta * cosTheta);
 
-        // Relativistic orbital velocity increases closer to center
-        float orbitalSpeed = (3.0 / (r * 0.3 + 0.5)) * time * 0.8;
-        float swirlTheta = theta + orbitalSpeed;
-
-        // Swirling plasma filaments via FBM noise
-        vec2 noiseCoord = vec2(r * 1.5, swirlTheta * 3.0);
-        float plasma = fbm(noiseCoord);
-
-        // Relativistic Doppler Beaming (approaching side is brighter & blue-shifted)
-        // Cosine of angle relative to camera view
-        float dopplerFactor = sin(theta + 0.3); // -1.0 to +1.0
-        float dopplerBoost = pow(clamp(dopplerFactor * 0.5 + 0.5, 0.0, 1.0), 2.2);
-
-        // Color blending based on temperature and Doppler shift
-        vec3 col = mix(redShiftColor, coreColor, clamp((r - innerRadius) / (outerRadius - innerRadius), 0.0, 1.0));
-        col = mix(col, blueShiftColor, dopplerBoost * 0.7);
-
-        // Radial falloff and hot photon ring near inner radius
-        float innerFade = smoothstep(innerRadius, innerRadius + 0.4, r);
-        float outerFade = smoothstep(outerRadius, outerRadius - 1.5, r);
-        float photonRing = 1.0 / (abs(r - (innerRadius + 0.15)) * 12.0 + 0.2);
-
-        float intensity = (plasma * 0.7 + 0.3) * innerFade * outerFade * (0.8 + dopplerBoost * 1.4) + (photonRing * 0.45);
-        intensity += audioIntensity * 0.35;
-
-        gl_FragColor = vec4(col * intensity * 2.2, clamp(intensity * 1.5, 0.0, 0.95));
+        vec3 litColor = ringTex.rgb * (shadow * 0.9 + 0.1) * phase;
+        gl_FragColor = vec4(litColor, ringTex.a);
       }
     `
   },
 
   // --------------------------------------------------------------------------
-  // 2. HYPERSPACE WARP TUNNEL PROCEDURAL SHADER
+  // 5. EARTH MULTI-SPECTRAL MATERIAL: DAY/NIGHT LIGHTS & OCEAN SPECULAR GLINT
   // --------------------------------------------------------------------------
-  HyperspaceTunnel: {
+  EarthSurface: {
     uniforms: {
-      time: { value: 0 },
-      speed: { value: 2.5 },
-      colorA: { value: new THREE.Color(0x00f0ff) },
-      colorB: { value: new THREE.Color(0xb026ff) },
-      distortion: { value: 1.0 }
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      varying vec3 vPosition;
-
-      void main() {
-        vUv = uv;
-        vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform float time;
-      uniform float speed;
-      uniform vec3 colorA;
-      uniform vec3 colorB;
-      uniform float distortion;
-
-      varying vec2 vUv;
-      varying vec3 vPosition;
-
-      void main() {
-        // Z-axis movement through tunnel
-        vec2 uv = vUv;
-        uv.y = uv.y * 3.0 - time * speed;
-
-        // Radial streak pattern
-        float streaks = sin(uv.x * 60.0 + sin(uv.y * 4.0)) * 0.5 + 0.5;
-        streaks = pow(streaks, 8.0); // sharp light streaks
-
-        // Speed pulse rings
-        float rings = sin(uv.y * 12.0) * 0.5 + 0.5;
-        rings = pow(rings, 4.0);
-
-        // Dynamic color mix
-        vec3 col = mix(colorA, colorB, sin(uv.x * 10.0 + time) * 0.5 + 0.5);
-        col += vec3(0.3, 0.7, 1.0) * rings * 0.8;
-        col += vec3(1.0) * streaks * 1.5;
-
-        // Depth fogging
-        float alpha = clamp(streaks * 1.2 + rings * 0.6, 0.15, 0.85);
-
-        gl_FragColor = vec4(col, alpha);
-      }
-    `
-  },
-
-  // --------------------------------------------------------------------------
-  // 3. QUANTUM STRING CALABI-YAU LATTICE SHADER
-  // --------------------------------------------------------------------------
-  QuantumLattice: {
-    uniforms: {
-      time: { value: 0 },
-      audioFreq: { value: 0 },
-      coreColor: { value: new THREE.Color(0x00ffcc) },
-      rimColor: { value: new THREE.Color(0xff00aa) }
-    },
-    vertexShader: `
-      uniform float time;
-      uniform float audioFreq;
-      varying vec3 vNormal;
-      varying vec3 vWorldPos;
-
-      void main() {
-        vNormal = normalize(normalMatrix * normal);
-        
-        // Quantum harmonic oscillation
-        vec3 p = position;
-        float wave = sin(p.x * 3.0 + time * 3.0) * cos(p.y * 3.0 + time * 2.0) * sin(p.z * 3.0 + time * 2.5);
-        p += normal * (wave * 0.35 + (audioFreq * 0.4));
-
-        vec4 worldPos = modelMatrix * vec4(p, 1.0);
-        vWorldPos = worldPos.xyz;
-        gl_Position = projectionMatrix * viewMatrix * worldPos;
-      }
-    `,
-    fragmentShader: `
-      uniform float time;
-      uniform vec3 coreColor;
-      uniform vec3 rimColor;
-      varying vec3 vNormal;
-      varying vec3 vWorldPos;
-
-      void main() {
-        vec3 viewDir = normalize(cameraPosition - vWorldPos);
-        float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
-        fresnel = pow(fresnel, 2.8);
-
-        vec3 col = mix(coreColor, rimColor, fresnel);
-        gl_FragColor = vec4(col * (1.2 + fresnel * 2.0), clamp(0.3 + fresnel * 0.7, 0.0, 1.0));
-      }
-    `
-  },
-
-  // --------------------------------------------------------------------------
-  // 4. DYSON SOLAR SURFACE PROCEDURAL SHADER
-  // --------------------------------------------------------------------------
-  DysonSolarSurface: {
-    uniforms: {
-      time: { value: 0 },
-      solarColorA: { value: new THREE.Color(0xff4500) },
-      solarColorB: { value: new THREE.Color(0xffea00) },
-      audioIntensity: { value: 0.0 }
+      dayTexture: { value: null },
+      nightTexture: { value: null },
+      specularMap: { value: null },
+      cloudsTexture: { value: null },
+      sunPosition: { value: new THREE.Vector3(0, 0, 0) },
+      cloudTime: { value: 0.0 }
     },
     vertexShader: `
       varying vec2 vUv;
       varying vec3 vNormal;
-      varying vec3 vWorldPos;
+      varying vec3 vWorldPosition;
+      varying vec3 vViewDir;
 
       void main() {
         vUv = uv;
         vNormal = normalize(normalMatrix * normal);
         vec4 worldPos = modelMatrix * vec4(position, 1.0);
-        vWorldPos = worldPos.xyz;
-        gl_Position = projectionMatrix * viewMatrix * worldPos;
+        vWorldPosition = worldPos.xyz;
+        vec4 mvPosition = viewMatrix * worldPos;
+        vViewDir = normalize(-mvPosition.xyz);
+        gl_Position = projectionMatrix * mvPosition;
       }
     `,
     fragmentShader: `
-      uniform float time;
-      uniform vec3 solarColorA;
-      uniform vec3 solarColorB;
-      uniform float audioIntensity;
+      uniform sampler2D dayTexture;
+      uniform sampler2D nightTexture;
+      uniform sampler2D specularMap;
+      uniform sampler2D cloudsTexture;
+      uniform vec3 sunPosition;
+      uniform float cloudTime;
 
       varying vec2 vUv;
       varying vec3 vNormal;
-      varying vec3 vWorldPos;
-
-      float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
-      }
-
-      float noise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
-                   mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
-      }
-
-      float fbm(vec2 p) {
-        float v = 0.0;
-        float a = 0.5;
-        for (int i = 0; i < 4; ++i) {
-          v += a * noise(p);
-          p = p * 2.2;
-          a *= 0.5;
-        }
-        return v;
-      }
+      varying vec3 vWorldPosition;
+      varying vec3 vViewDir;
 
       void main() {
-        vec2 p = vUv * 8.0;
-        float n1 = fbm(p + time * 0.15);
-        float n2 = fbm(p * 1.8 - time * 0.2 + n1);
+        vec3 lightDir = normalize(sunPosition - vWorldPosition);
+        vec3 normal = normalize(vNormal);
 
-        // Corona limb brightening
-        vec3 viewDir = normalize(cameraPosition - vWorldPos);
-        float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
-        fresnel = pow(fresnel, 2.0);
+        // Day vs night illumination
+        float NdotL = dot(normal, lightDir);
+        float dayWeight = smoothstep(-0.15, 0.15, NdotL);
+        float nightWeight = 1.0 - dayWeight;
 
-        vec3 col = mix(solarColorA, solarColorB, n2 * 1.4);
-        col += vec3(1.0, 0.9, 0.5) * (fresnel * 1.5 + audioIntensity * 0.4);
+        // Sample textures
+        vec3 dayColor = texture2D(dayTexture, vUv).rgb;
+        vec3 nightColor = texture2D(nightTexture, vUv).rgb;
+        float specValue = texture2D(specularMap, vUv).r;
 
-        gl_FragColor = vec4(col * 1.8, 1.0);
-      }
-    `
-  },
+        // Moving clouds with shadow cast onto terrain
+        vec2 cloudUv = vec2(vUv.x + cloudTime * 0.005, vUv.y);
+        vec4 cloudColor = texture2D(cloudsTexture, cloudUv);
 
-  // --------------------------------------------------------------------------
-  // 5. STARGATE DIMENSIONAL EVENT HORIZON SHADER
-  // --------------------------------------------------------------------------
-  StargateHorizon: {
-    uniforms: {
-      time: { value: 0 },
-      portalColor: { value: new THREE.Color(0x00d0ff) },
-      energyColor: { value: new THREE.Color(0xffffff) },
-      audioIntensity: { value: 0.0 }
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      varying vec3 vPosition;
+        // Specular Sun glint on oceans
+        vec3 halfVector = normalize(lightDir + vViewDir);
+        float NdotH = max(dot(normal, halfVector), 0.0);
+        float specularGlint = pow(NdotH, 48.0) * specValue * dayWeight * 1.5;
 
-      void main() {
-        vUv = uv;
-        vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform float time;
-      uniform vec3 portalColor;
-      uniform vec3 energyColor;
-      uniform float audioIntensity;
+        // Combine surface day/night
+        vec3 baseSurface = dayColor * dayWeight + nightColor * (nightWeight * 1.6);
+        baseSurface += vec3(specularGlint);
 
-      varying vec2 vUv;
-      varying vec3 vPosition;
+        // Blend clouds over surface (clouds illuminate white on day side, dark on night side)
+        vec3 litCloud = cloudColor.rgb * (dayWeight * 1.1 + 0.04);
+        vec3 finalColor = mix(baseSurface, litCloud, cloudColor.a * 0.85);
 
-      void main() {
-        vec2 uv = vUv - 0.5;
-        float r = length(uv) * 2.0;
-
-        if (r > 1.0) discard;
-
-        float theta = atan(uv.y, uv.x);
-
-        // Concentric ripples and vortex spin
-        float ripples = sin(r * 32.0 - time * 6.0 + sin(theta * 6.0)) * 0.5 + 0.5;
-        ripples = pow(ripples, 2.5);
-
-        // Electric lightning sparks
-        float sparks = sin(theta * 18.0 + time * 8.0) * sin(r * 24.0);
-        sparks = pow(clamp(sparks, 0.0, 1.0), 5.0);
-
-        // Central vortex glow
-        float coreGlow = 1.0 - smoothstep(0.0, 0.75, r);
-
-        vec3 col = mix(portalColor, energyColor, ripples * 0.6 + sparks * 0.8);
-        col += vec3(0.1, 0.5, 1.0) * coreGlow * 1.5;
-        col += vec3(0.5, 0.8, 1.0) * audioIntensity * 0.4;
-
-        float alpha = clamp(ripples * 0.7 + coreGlow * 0.85 + sparks, 0.25, 0.95);
-
-        gl_FragColor = vec4(col * 1.6, alpha);
-      }
-    `
-  },
-
-  // --------------------------------------------------------------------------
-  // 6. RELATIVISTIC PULSAR SYNCHROTRON BEAM SHADER
-  // --------------------------------------------------------------------------
-  PulsarBeam: {
-    uniforms: {
-      time: { value: 0 },
-      beamColor: { value: new THREE.Color(0x70d0ff) },
-      coreColor: { value: new THREE.Color(0xffffff) },
-      audioIntensity: { value: 0.0 }
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      varying vec3 vPosition;
-
-      void main() {
-        vUv = uv;
-        vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform float time;
-      uniform vec3 beamColor;
-      uniform vec3 coreColor;
-      uniform float audioIntensity;
-
-      varying vec2 vUv;
-      varying vec3 vPosition;
-
-      void main() {
-        // Distance from central axis (x = 0.5)
-        float distFromCenter = abs(vUv.x - 0.5) * 2.0;
-
-        // Taper along length (y axis)
-        float lengthTaper = 1.0 - smoothstep(0.0, 1.0, vUv.y);
-
-        // Core intensity
-        float core = 1.0 - smoothstep(0.0, 0.25, distFromCenter);
-        float aura = 1.0 - smoothstep(0.1, 1.0, distFromCenter);
-
-        // Spiral energy waves moving up the beam
-        float waves = sin(vUv.y * 40.0 - time * 12.0) * 0.5 + 0.5;
-
-        vec3 col = mix(beamColor, coreColor, core);
-        col += vec3(0.5, 0.8, 1.0) * waves * 0.4 + audioIntensity * 0.3;
-
-        float alpha = (core * 0.95 + aura * 0.45) * lengthTaper;
-        gl_FragColor = vec4(col * 2.0, alpha);
-      }
-    `
-  },
-
-  // --------------------------------------------------------------------------
-  // 7. TESSERACT 4D HYPERCUBE FRESNEL ENERGY SHADER
-  // --------------------------------------------------------------------------
-  TesseractHypercube: {
-    uniforms: {
-      time: { value: 0 },
-      edgeColor: { value: new THREE.Color(0x00f0ff) },
-      goldColor: { value: new THREE.Color(0xffaa00) },
-      audioIntensity: { value: 0.0 }
-    },
-    vertexShader: `
-      varying vec3 vNormal;
-      varying vec3 vWorldPos;
-      varying vec2 vUv;
-
-      void main() {
-        vUv = uv;
-        vNormal = normalize(normalMatrix * normal);
-        vec4 worldPos = modelMatrix * vec4(position, 1.0);
-        vWorldPos = worldPos.xyz;
-        gl_Position = projectionMatrix * viewMatrix * worldPos;
-      }
-    `,
-    fragmentShader: `
-      uniform float time;
-      uniform vec3 edgeColor;
-      uniform vec3 goldColor;
-      uniform float audioIntensity;
-
-      varying vec3 vNormal;
-      varying vec3 vWorldPos;
-      varying vec2 vUv;
-
-      void main() {
-        vec3 viewDir = normalize(cameraPosition - vWorldPos);
-        float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
-        fresnel = pow(fresnel, 3.0);
-
-        // Dimensional glyph coordinate scanlines
-        float glyphs = sin(vUv.x * 30.0 + time * 2.0) * sin(vUv.y * 30.0 - time * 2.0);
-        glyphs = pow(clamp(glyphs, 0.0, 1.0), 4.0);
-
-        vec3 col = mix(edgeColor, goldColor, sin(time + vWorldPos.y * 0.5) * 0.5 + 0.5);
-        col += goldColor * glyphs * 1.5;
-
-        float alpha = clamp(fresnel * 1.2 + glyphs * 0.8 + audioIntensity * 0.3, 0.2, 0.95);
-        gl_FragColor = vec4(col * (1.5 + fresnel * 2.0), alpha);
+        gl_FragColor = vec4(finalColor, 1.0);
       }
     `
   }
 };
-
-window.CustomShaders = CustomShaders;

@@ -1,142 +1,135 @@
-# 🌌 PROJECT AETHEL: THE SINGULARITY PROTOCOL
+# ☀️ SOLAR SYSTEM 3D // KEPLERIAN ASTRODYNAMICS & LINE-WISE EXPLORER
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-cyan.svg)](https://opensource.org/licenses/MIT)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-black?logo=three.js)](https://threejs.org/)
-[![Web Audio API](https://img.shields.io/badge/Audio-Procedural_WebAudio-blueviolet)](#procedural-audio-engine)
-[![60 FPS](https://img.shields.io/badge/Performance-60_FPS_Locked-00ff88)](#performance-architecture)
+[![Web Audio API](https://img.shields.io/badge/Audio-Planetary_Sonification-ffb700)](#planetary-audio-sonification)
+[![60 FPS](https://img.shields.io/badge/Performance-60_FPS_Locked-00ff88)](#astrodynamic-engine)
 
-> *“Beyond the event horizon lies not the end of time, but the inception of infinity.”*
+> *“The Earth is the cradle of humanity, but mankind cannot stay in the cradle forever.” — Konstantin Tsiolkovsky*
 
-**Project Aethel** is a state-of-the-art, hyper-cinematic 3D WebGL odyssey built from the ground up with Three.js, custom GLSL shaders, procedural Web Audio synthesis, and an interactive sci-fi HUD. It delivers an AAA film-grade interactive experience directly in the browser with zero external dependencies.
+**Solar System 3D** is an ultra-realistic, physically grounded 3D astronomical simulator built with Three.js, custom GLSL astrophysical shaders, real-time Keplerian orbital mechanics solvers, and NASA/JPL Horizons telemetry.
 
----
-
-## 🚀 Experience Features
-
-### 🎬 5 Interactive Cinematic Acts
-1. **Act I: Gargantua Singularity**
-   - Procedural gravitational lensing and relativistic Doppler beaming accretion disk shader.
-   - 4,000-particle infall accretion stream spiraling towards the event horizon.
-   - Orbiting telemetry probe *ENDURANCE-01* with active navigational beacons.
-   - Relativistic time dilation gauge (+7.24 Earth Years per local minute).
-
-2. **Act II: Sector 07 Neo-Babylon (Cyber Megalopolis)**
-   - 120 procedural skyscrapers with illuminated window lattices and rooftop beacons.
-   - Multi-colored neon holographic advertising billboards.
-   - Dynamic flying spinner traffic traveling along elevated sky-corridors.
-   - Volumetric rain simulation and reflective wet cyber-grid floor.
-
-3. **Act III: The Quantum Core**
-   - Calabi-Yau mathematical manifold lattice with pulsating harmonic displacement shaders.
-   - Glowing quantum core seed with audio-frequency reactive breathing.
-   - Superconducting magnetic containment rings revolving along orthogonal Euler axes.
-   - 2,000 sub-atomic floating quantum sparks.
-
-4. **Act IV: Hyperspace Warp Runner (Flight Simulator & Combat)**
-   - Interactive high-velocity flight through a procedural wormhole vortex.
-   - Pilot your interceptor spacecraft using `WASD` or Arrow Keys.
-   - **Dual Plasma Photon Cannons**: Fire with Left Click or `Enter` to destroy crystalline space debris for score bonuses!
-   - Collision recoil and screen-shake physics on debris impact.
-   - Fly through holographic acceleration rings for score multipliers and speed boosts (up to Mach 9999).
-   - Dynamic thruster sound that modulates pitch and resonance based on vessel throttle.
-
-5. **Act V: The Multiverse Codex**
-   - Interactive 3D alien exoplanet *Aethel-Prime* with dynamic atmospheric Fresnel scattering.
-   - Bioluminescent surface topography and stardust rings.
-   - Orbiting scanner probes analyzing atmospheric composition, surface gravity, and habitability ratings.
-
-6. **Act VI: The Dyson Sphere (Stellar Harvester)**
-   - Mega-scale Dyson swarm encasing a blazing procedural star with coronal plasma flares.
-   - Three concentric orbiting collector rings with dozens of hexagonal solar mirrors.
-   - Orbital energy capacitor station with focused plasma transfer beams.
-
-7. **Act VII: The Tachyon Stargate (Multiverse Portal)**
-   - Ancient metallic Stargate ring structure with rotating chevron glyph dials.
-   - Shimmering liquid dimensional wormhole event horizon shader.
-   - Crackling electric lightning arcs dancing across the event horizon.
+It features **dual visual simulation modes**:
+1. **Line-Wise Cosmic Alignment Mode**: All celestial bodies arranged linearly from the Sun outward along an illuminated cosmic scale bar for side-by-side comparative inspection and linear flyby.
+2. **Heliocentric Keplerian Orrery Mode**: True 3D gravitational elliptical orbits governed by Kepler's laws of planetary motion.
 
 ---
 
-## 🔊 Procedural Web Audio Engine
+## 🪐 Celestial Bodies & Astronomical Sequence
 
-Zero static audio files are used. The entire soundscape is generated algorithmically in real time using the **Web Audio API**:
-- **Hans Zimmer Cinematic Drone**: Detuned saw and sine wave oscillators routed through resonant lowpass filters with slow LFO frequency swells, playing emotional harmonic progressions ($D_{min} \rightarrow B\flat \rightarrow F \rightarrow C \rightarrow G_{min}$).
-- **The Iconic "BRAAAM" Horn Blast**: Distorted brass oscillators with exponential pitch decay and sub-bass impact.
-- **Cyberpunk Synthwave Sequencer**: 16-step procedural bassline synthesizer (128 BPM) with 4-on-the-floor kicks and offbeat hi-hats. Toggle with `S`.
-- **Dual Plasma Laser Cannons**: High-velocity frequency sweep blaster sound with sharp transient attack.
-- **Debris Explosion SFX**: Resonant low-pass filtered noise burst with sub-bass thump.
-- **Hyperspace Warp Jump**: Rising frequency chirp with stereo Doppler pan and sub-bass drop.
-- **Adaptive Thruster Sound**: Pink/Brown noise generator with real-time frequency tracking linked to flight velocity.
-- **Real-Time FFT Audio Visualizer**: 32-band frequency spectrum rendered directly onto the HUD canvas.
+The system models all primary bodies in exact astronomical order from the center outward:
 
----
-
-## 💻 Interactive Holo-Terminal Directives
-
-Press `T` or click **TERMINAL** to open the interactive sci-fi console. Supported commands:
-- `help` - Lists all vessel commands and protocols
-- `warp <1-7>` - Hyperjump directly to specified act (1 to 7)
-- `blackhole` - Teleport to Gargantua Event Horizon (Act 1)
-- `cyberpunk` - Jump to Sector 07 Megacity (Act 2)
-- `quantum` - Enter the Calabi-Yau Core (Act 3)
-- `flight` - Launch the Hyperspace Flight Simulator (Act 4)
-- `codex` - Open the Multiverse Planetary Archive (Act 5)
-- `dyson` - Jump to The Dyson Sphere Stellar Harvester (Act 6)
-- `stargate` - Jump to The Tachyon Stargate Event Horizon (Act 7)
-- `fire` - Discharge dual plasma photon cannons (Act 4)
-- `synthwave` - Toggle 128 BPM cyberpunk procedural sequencer
-- `braaam` - Trigger Hans Zimmer horn blast
-- `camera <mode>` - Toggle camera ('director', 'trailer', 'cockpit', 'free')
-- `status` - Telemetry diagnostics and shield status
-- `time` - Measure relativistic time dilation
-- `shields` - Recalibrate deflector harmonics
-- `matrix` - Decrypt quantum matrix easter egg
-- `lore` - Read ancient historical logs of Project Aethel
-- `clear` - Clear terminal buffer
+| Body | Classification | Semi-Major Axis ($a$) | Eccentricity ($e$) | Inclination ($i$) | Key Astrodynamic Feature |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **☀️ The Sun (Sol)** | Yellow Dwarf (G2V) | 0.000 AU | 0.0000 | 0.00° | GLSL convective plasma granulation & solar corona |
+| **☿ Mercury** | Terrestrial | 0.387 AU | 0.2056 | 7.00° | Relativistic perihelion precession; 610°C thermal swing |
+| **♀ Venus** | Terrestrial | 0.723 AU | 0.0067 | 3.39° | Dense sulfuric acid cloud deck & runaway greenhouse |
+| **🜨 Earth & Luna** | Habitable Oasis | 1.000 AU | 0.0167 | 0.00° | Multi-spectral terminator, night city lights, specular ocean glint |
+| **♂ Mars** | Terrestrial | 1.524 AU | 0.0934 | 1.85° | Olympus Mons (21.9 km), Valles Marineris & polar ice |
+| **☄ Asteroid Belt** | Debris Ring & Ceres | 2.770 AU | 0.0758 | 10.59° | 1,400+ instanced tumbling asteroids & dwarf planet Ceres |
+| **♃ Jupiter** | Gas Giant | 5.204 AU | 0.0485 | 1.30° | Differential zonal winds, Great Red Spot vortex & 4 Galilean moons |
+| **♄ Saturn** | Gas Giant with Rings | 9.582 AU | 0.0555 | 2.49° | Photorealistic ice rings with Cassini division & shadow casting |
+| **⛢ Uranus** | Ice Giant | 19.201 AU | 0.0463 | 0.77° | 97.77° sideways axial tilt, vertical rings & methane atmosphere |
+| **♆ Neptune** | Ice Giant | 30.047 AU | 0.0094 | 1.77° | Supersonic winds (>2,100 km/h), Great Dark Spot & Triton |
+| **♇ Pluto & Charon**| Kuiper Belt Binary | 39.482 AU | 0.2488 | 17.16° | Tombaugh Regio nitrogen ice heart & mutual binary barycenter |
+| **🛰 Voyager 1** | Interstellar Probe | 162.00 AU | 1.3000 | 35.50° | High-gain antenna, Golden Record, RTG power boom & Heliopause |
 
 ---
 
-## 🎮 Keyboard & Mouse Controls
+## 📐 Astrodynamic & Mathematical Equations
 
-| Key / Input | Action |
-|-------------|--------|
-| **WASD / Arrows** | Steer spacecraft in Hyperspace Flight Sim |
-| **Spacebar** | Hyperspace Booster (Mach 9999) |
-| **1 - 5** | Instant Act Warp Jump |
-| **B** | Synthesize Hans Zimmer BRAAAM Horn Blast |
-| **T** | Toggle Holo-Terminal Console |
-| **M** | Toggle Audio Mute / Unmute |
-| **H** | Toggle HUD Display (for wallpaper screenshots) |
-| **F** | Toggle Fullscreen Mode |
-| **Mouse Drag** | Orbit around scene in Free Camera Mode |
+### 1. Kepler's Equation & Iterative Newton-Raphson Solver
+Planetary position at time $t$ is computed from the mean anomaly $M(t)$ and eccentricity $e$:
+$$M(t) = M_0 + n \cdot t \quad \text{where } n = \frac{2\pi}{T}$$
+$$M = E - e \sin E$$
 
----
+Solved at each frame using Newton-Raphson iteration:
+$$E_{k+1} = E_k - \frac{E_k - e \sin E_k - M}{1 - e \cos E_k}$$
 
-## 🛠️ Local Development & Quick Start
+### 2. True Anomaly ($\nu$) & Orbital Radius ($r$)
+$$\nu = 2 \arctan\left(\sqrt{\frac{1+e}{1-e}} \tan\frac{E}{2}\right)$$
+$$r = \frac{a(1 - e^2)}{1 + e \cos \nu}$$
 
-Simply serve the repository folder with any static file server:
+### 3. Vis-Viva Instantaneous Orbital Velocity
+$$v = \sqrt{G M_\odot \left(\frac{2}{r} - \frac{1}{a}\right)}$$
 
-```bash
-# Using Python 3
-python -m http.server 8000
-
-# Using Node (npx)
-npx serve .
-```
-
-Open `http://localhost:8000` in any modern WebGL-compatible browser (Chrome, Edge, Firefox, Safari) and click **ENGAGE** to enter the singularity.
+### 4. Surface Gravitation & Escape Velocity
+$$g = \frac{G M}{R^2}, \quad v_{esc} = \sqrt{\frac{2 G M}{R}}$$
 
 ---
 
-## 📜 Architecture & Technology Stack
-- **Graphics**: [Three.js r128](https://threejs.org/) + Custom GLSL Shaders (Additive Blending, ACES Filmic Tone Mapping)
-- **Audio**: Web Audio API (Multi-oscillator synthesis, WaveShaper distortion, BiquadFilter, AnalyserNode)
-- **AI Narration**: Web Speech API (`SpeechSynthesis`) + Typewriter HUD Subtitle System
-- **Styling**: Vanilla CSS3 Glassmorphism with hardware-accelerated transforms and `@keyframes`
+## 🎨 Custom GLSL Astrophysical Shaders
+
+1. **Sun Chromosphere & Granulation Shader**:
+   - Multi-octave 3D simplex noise simulating boiling convective granulation cells.
+   - Eddington approximation limb darkening equation: $I(\mu) = I_0(0.35 + 0.65\mu^{0.6})$.
+   - Additive pulsating solar corona glow with magnetic prominence arcs.
+2. **Atmospheric Rayleigh Scattering Shader**:
+   - Computes Fresnel rim scattering modulated by the solar illumination vector $(\mathbf{N} \cdot \mathbf{L})$.
+   - Golden-orange twilight tinting along the terminator for sunset/sunrise effects on Earth, Venus, Mars, and Titan.
+3. **Saturn Ring System & Mutual Shadow Occlusion**:
+   - Anisotropic forward and backward light scattering phase function.
+   - Ray-sphere intersection test calculating the shadow cast by Saturn's spherical body across the ring plane.
+4. **Earth Multi-Spectral Material**:
+   - Day continent terrain + ocean specular reflection mask (Sun glint).
+   - Night-side city lights smoothly blended across the light terminator.
+   - Independent rotating dynamic cloud deck with self-shadowing.
 
 ---
 
-## 👤 Author
-- **Mohammed Ashraf Shaik** ([@Mohammed-Ashraf-Shaik](https://github.com/Mohammed-Ashraf-Shaik))
+## 🎛 Controls & Navigation
 
-*Engineered with precision for advanced web immersion.*
+### Mouse & Touch
+- **Left Click + Drag**: 360° Orbit rotation around active celestial body.
+- **Scroll / Pinch**: Zoom in / out smoothly.
+- **Click Navigation Card**: Instantly target and fly to any planet or moon.
+
+### Keyboard Shortcuts
+- `[Spacebar]`: Pause / Resume simulation time flow.
+- `[1] - [9]`: Jump directly to celestial bodies.
+- `[T]`: Open NASA / JPL Astrodynamics CLI Terminal.
+- `[P]`: Capture high-resolution 4K wallpaper screenshot.
+- `[H]`: Toggle Heads-Up Display (clean cinematic view).
+- `[F]`: Toggle Fullscreen mode.
+
+### Astrodynamics CLI Commands
+Press `[T]` to open the terminal and type:
+- `goto <planet>` (e.g. `goto mars`, `goto saturn`)
+- `linewise` : Switch to Line-Wise Cosmic Alignment Mode
+- `helio` / `orrery` : Switch to Heliocentric Keplerian Orbit Mode
+- `tour` : Start Cinematic Grand Tour Autopilot
+- `timewarp <1|10|50|365>` : Set simulation speed (e.g. `timewarp 50`)
+- `calc <planet>` : Compute and print live Keplerian parameters and Vis-Viva velocity
+- `orbits on/off` : Toggle orbital ellipse paths
+- `grid on/off` : Toggle ecliptic coordinate grid
+- `radio` : Trigger planetary acoustic radio wave pulse
+
+---
+
+## 🔊 Planetary Audio Sonification
+
+The engine synthesizes acoustic signatures derived from NASA radio wave observations and magnetospheric emissions:
+- **The Sun**: Deep 5-minute $p$-mode acoustic helioseismology oscillation.
+- **Earth**: Whistlers and auroral chorus harmonics (432 Hz).
+- **Jupiter**: Booming Jovian decametric radio bursts with sweeping resonant bandpass filters.
+- **Saturn**: Dual-detuned kilometric radiation (SKR) choral drones.
+- **Voyager 1**: Interstellar carrier beacon and telemetry pulse.
+
+---
+
+## 🛠 Local Setup
+
+1. Clone or open the repository:
+   ```bash
+   cd "d:/Antigravity/something fun"
+   ```
+2. Start any local HTTP server:
+   ```bash
+   python -m http.server 8080
+   ```
+3. Open `http://localhost:8080` in Chrome, Firefox, Edge, or Safari.
+
+---
+
+## 📄 License
+MIT License. Free for educational, scientific, and personal use.

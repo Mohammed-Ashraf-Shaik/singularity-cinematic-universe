@@ -603,6 +603,58 @@ class AudioEngine {
     }
   }
 
+  // Planetary Radio Wave Acoustic Sonification Synthesizer
+  playPlanetaryRadioWave(planetId) {
+    if (this.isMuted || !this.ctx || !this.isInitialized) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+
+      // Planet-specific acoustic frequencies & wave signatures
+      const signatures = {
+        sun: { freq: 55, type: 'sawtooth', fFreq: 220, q: 4.0, dur: 1.8 },
+        mercury: { freq: 740, type: 'sine', fFreq: 1200, q: 2.0, dur: 0.6 },
+        venus: { freq: 110, type: 'triangle', fFreq: 350, q: 3.0, dur: 1.4 },
+        earth: { freq: 432, type: 'sine', fFreq: 864, q: 1.5, dur: 1.2 },
+        mars: { freq: 220, type: 'triangle', fFreq: 480, q: 2.5, dur: 0.9 },
+        asteroid_belt: { freq: 980, type: 'sine', fFreq: 2400, q: 5.0, dur: 0.4 },
+        jupiter: { freq: 73.4, type: 'sawtooth', fFreq: 280, q: 6.0, dur: 2.2 },
+        saturn: { freq: 330, type: 'sine', fFreq: 660, q: 4.5, dur: 1.6 },
+        uranus: { freq: 528, type: 'triangle', fFreq: 1056, q: 2.0, dur: 1.1 },
+        neptune: { freq: 146.8, type: 'sawtooth', fFreq: 400, q: 3.5, dur: 1.5 },
+        pluto: { freq: 98, type: 'sine', fFreq: 200, q: 1.0, dur: 1.0 },
+        voyager1: { freq: 880, type: 'square', fFreq: 1760, q: 3.0, dur: 0.5 }
+      };
+
+      const sig = signatures[planetId] || { freq: 440, type: 'sine', fFreq: 880, q: 2.0, dur: 1.0 };
+
+      osc.type = sig.type;
+      osc.frequency.setValueAtTime(sig.freq, now);
+      // Subtle pitch bend for Doppler effect
+      osc.frequency.exponentialRampToValueAtTime(sig.freq * 0.96, now + sig.dur);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(sig.fFreq, now);
+      filter.Q.setValueAtTime(sig.q, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.35, now + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + sig.dur);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.sfxGain);
+
+      osc.start(now);
+      osc.stop(now + sig.dur);
+    } catch (e) {
+      console.warn('Sonification audio error:', e);
+    }
+  }
+
   // Toggle Mute
   toggleMute() {
     this.isMuted = !this.isMuted;

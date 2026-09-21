@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PROJECT AETHEL // THE SINGULARITY PROTOCOL</title>
-  <meta name="description" content="A breathtaking, hyper-cinematic 3D WebGL sci-fi universe with procedural Web Audio synthesis, interactive Black Hole shaders, cyberpunk megalopolis, and hyperspace flight simulator.">
+  <title>SOLAR SYSTEM 3D // KEPLERIAN ASTRODYNAMICS & LINE-WISE EXPLORER</title>
+  <meta name="description" content="An ultra-realistic, physically accurate 3D Solar System simulation featuring real Keplerian orbital mechanics, dual Line-Wise Cosmic Alignment & Heliocentric Orrery modes, multi-spectral GLSL planetary shaders, and NASA telemetry.">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌌</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀️</text></svg>">
 </head>
 <body>
 
@@ -20,78 +20,92 @@
     <div class="letterbox-bar top"></div>
     <div class="letterbox-bar bottom"></div>
 
-    <!-- Cinematic Screen Overlays (Scanlines, Vignette, Lens Flare) -->
+    <!-- Screen Overlays (Vignette, Anamorphic Flare, Scanlines) -->
     <div class="cinema-overlays">
       <div class="scanlines"></div>
       <div class="vignette"></div>
       <div class="anamorphic-flare"></div>
     </div>
 
-    <!-- Hyperspace Warp White Flash -->
+    <!-- Fast Warp White Transition Flash -->
     <div id="hyperspace-flash"></div>
 
     <!-- ====================================================================
-         BOOTSTRAP INITIALIZATION MODAL (AUDIO & WEBGL WAKEUP)
+         INITIALIZATION / MISSION LAUNCH MODAL
          ==================================================================== -->
     <div id="init-modal">
       <div class="init-card">
-        <div class="init-badge">DIMENSIONAL HARMONICS ENGINE</div>
-        <h1 class="init-title">PROJECT AETHEL</h1>
+        <div class="init-badge">ASTROPHYSICAL SIMULATION ENGINE</div>
+        <h1 class="init-title">SOLAR SYSTEM 3D</h1>
         <p class="init-subtitle">
-          An interactive cinematic odyssey through cosmic singularities, cybernetic megalopolises, quantum string fields, and interstellar wormholes.
+          An ultra-realistic, physically grounded 3D cosmic simulator. Explore all planets, moons, the Asteroid Belt, and Voyager 1 in Line-Wise Cosmic Alignment or true Keplerian Heliocentric Orbits.
         </p>
 
         <div class="reactor-btn-wrap">
-          <button id="reactor-btn" class="reactor-btn" aria-label="Engage Quantum Core">
+          <button id="reactor-btn" class="reactor-btn" aria-label="Engage Solar System Simulation">
             <div class="reactor-rings"></div>
             <div class="reactor-rings-outer"></div>
-            <div class="reactor-icon">⚛</div>
-            <div class="reactor-text">ENGAGE</div>
+            <div class="reactor-icon">☀️</div>
+            <div class="reactor-text">LAUNCH SIMULATION</div>
           </button>
         </div>
 
         <div class="init-specs">
           <div class="spec-item">
+            ORBITAL MECHANICS
+            <span>KEPLERIAN VIS-VIVA</span>
+          </div>
+          <div class="spec-item">
+            ALIGNMENT MODES
+            <span>LINE-WISE & ORRERY</span>
+          </div>
+          <div class="spec-item">
             RENDER PIPELINE
-            <span>THREE.JS GLSL SHADERS</span>
-          </div>
-          <div class="spec-item">
-            AUDIO SYNTHESIS
-            <span>WEB AUDIO HANS ZIMMER</span>
-          </div>
-          <div class="spec-item">
-            DIMENSIONAL ACTS
-            <span>9 CINEMATIC WORLDS</span>
+            <span>GLSL SOLAR PLASMA & SHADOWS</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- ====================================================================
-         HEADS-UP DISPLAY (HUD) INTERACTIVE INTERFACE
+         MISSION CONTROL HEADS-UP DISPLAY (HUD)
          ==================================================================== -->
     <div id="hud-container">
       
-      <!-- TOP TELEMETRY BAR -->
+      <!-- TOP NAVIGATION & SIMULATION TELEMETRY BAR -->
       <header class="hud-top-bar">
         <div class="brand-section">
           <div class="brand-logo">
-            <span>AETHEL</span> // PROTOCOL
+            <span>SOLAR SYSTEM</span> // KEPLER 3D
           </div>
           <div class="sys-status-tag">
             <span class="status-dot"></span>
-            CORE ONLINE
+            ASTRODYNAMICS ACTIVE
           </div>
         </div>
 
+        <!-- Mode Switcher -->
+        <div class="mode-switch-group">
+          <button id="mode-linewise-btn" class="mode-btn active" title="Line-Wise Cosmic Alignment Mode">
+            <span class="mode-icon">⎯⎯⎯</span> LINE-WISE ALIGNMENT
+          </button>
+          <button id="mode-helio-btn" class="mode-btn" title="Heliocentric Keplerian Orrery Mode">
+            <span class="mode-icon">◎</span> HELIOCENTRIC ORRERY
+          </button>
+          <button id="mode-tour-btn" class="mode-btn" title="Cinematic Grand Tour Autopilot">
+            <span class="mode-icon">🚀</span> GRAND TOUR
+          </button>
+        </div>
+
+        <!-- Simulation Time Telemetry -->
         <div class="top-telemetry-metrics">
           <div class="metric-item">
-            <span class="metric-unit">EARTH DATE: </span>
-            <span id="earth-date-val" class="metric-val">2026.09.21</span>
+            <span class="metric-unit">SIM TIME: </span>
+            <span id="sim-time-val" class="metric-val">T+ 0.0 DAYS</span>
           </div>
           <div class="metric-item">
-            <span class="metric-unit">TIME DILATION: </span>
-            <span id="dilation-val" class="metric-val">+7.24 YR/MIN</span>
+            <span class="metric-unit">TIME WARP: </span>
+            <span id="timewarp-val" class="metric-val">1× (1s = 1d)</span>
           </div>
           <div class="metric-item">
             <span class="metric-unit">FPS: </span>
@@ -99,264 +113,223 @@
           </div>
         </div>
 
+        <!-- Quick Actions -->
         <div class="top-quick-actions">
-          <button id="mobile-acts-btn" class="hud-btn mobile-acts-btn" title="Toggle Dimensional Coordinates Act Menu">ACTS [1-9] ▾</button>
-          <button id="sound-lab-btn-top" class="hud-btn sound-lab-toggle" style="border-color: var(--color-secondary);" title="Open Audio FX Studio & Kaoss Pad (Key: L)">LAB [L]</button>
-          <button id="photo-btn-top" class="hud-btn photo-toggle" style="border-color: var(--color-primary);" title="Capture 4K Wallpaper Screenshot (Key: P)">PHOTO [P]</button>
-          <button id="aspect-btn" class="hud-btn" title="Toggle Cinemascope 2.39:1 / 16:9 Letterboxing">16:9 FULL</button>
-          <button id="hide-hud-btn" class="hud-btn" title="Toggle HUD Display (Key: H)">HUD [H]</button>
+          <button id="sound-toggle-btn" class="hud-btn sound-toggle-btn" title="Toggle Planetary Audio Sonification">🔊</button>
+          <button id="photo-btn" class="hud-btn photo-toggle" title="Capture 4K Wallpaper Screenshot (Key: P)">📸 PHOTO</button>
+          <button id="terminal-toggle-btn" class="hud-btn" title="Open Astrodynamics Terminal (Key: T)">CLI [T]</button>
+          <button id="hide-hud-btn" class="hud-btn" title="Toggle HUD Visibility (Key: H)">HUD [H]</button>
           <button id="fullscreen-btn" class="hud-btn" title="Toggle Fullscreen (Key: F)">⛶</button>
         </div>
       </header>
 
-      <!-- ACT NAVIGATION (LEFT RAIL) -->
-      <nav class="hud-left-rail" aria-label="Dimensional Acts">
-        <div class="rail-label">DIMENSIONAL COORDINATES</div>
-        
-        <div class="act-nav-item active" data-act="1">
-          <div class="act-num">ACT 01 // HORIZON</div>
-          <div class="act-name">GARGANTUA SINGULARITY</div>
-          <div class="act-desc">Supermassive Black Hole & Lensing</div>
+      <!-- LINE-WISE PLANETARY SELECTOR (LEFT RAIL) -->
+      <nav class="hud-left-rail" id="celestial-selector-rail" aria-label="Celestial Bodies in Astronomical Sequence">
+        <div class="rail-header">
+          <span class="rail-label">LINE-WISE CELESTIAL BODIES</span>
+          <span class="rail-sub">ASTRONOMICAL ORDER (SUN → OUTWARD)</span>
         </div>
 
-        <div class="act-nav-item" data-act="2">
-          <div class="act-num">ACT 02 // MEGALOPOLIS</div>
-          <div class="act-name">SECTOR 07 NEO-BABYLON</div>
-          <div class="act-desc">Cyberpunk Monoliths & Wet Grid</div>
-        </div>
+        <div class="celestial-scroll-list" id="celestial-scroll-list">
+          <!-- Populated dynamically via JS or statically linked -->
+          <div class="act-nav-item" data-body="sun">
+            <div class="act-badge">00 // STAR</div>
+            <div class="act-name">☀️ THE SUN (SOL)</div>
+            <div class="act-desc">0.00 AU · G2V Yellow Dwarf</div>
+          </div>
 
-        <div class="act-nav-item" data-act="3">
-          <div class="act-num">ACT 03 // QUANTUM</div>
-          <div class="act-name">CALABI-YAU LATTICE</div>
-          <div class="act-desc">Resonant Sub-Atomic Core</div>
-        </div>
+          <div class="act-nav-item" data-body="mercury">
+            <div class="act-badge">01 // TERRESTRIAL</div>
+            <div class="act-name">☿ MERCURY</div>
+            <div class="act-desc">0.39 AU · Scorched Regolith</div>
+          </div>
 
-        <div class="act-nav-item" data-act="4">
-          <div class="act-num">ACT 04 // WARP RUNNER</div>
-          <div class="act-name">HYPERSPACE FLIGHT</div>
-          <div class="act-desc">Interactive Wormhole Flight Sim</div>
-        </div>
+          <div class="act-nav-item" data-body="venus">
+            <div class="act-badge">02 // TERRESTRIAL</div>
+            <div class="act-name">♀ VENUS</div>
+            <div class="act-desc">0.72 AU · Sulfuric Acid Deck</div>
+          </div>
 
-        <div class="act-nav-item" data-act="5">
-          <div class="act-num">ACT 05 // CODEX</div>
-          <div class="act-name">MULTIVERSE ARCHIVE</div>
-          <div class="act-desc">Exoplanet & Planetary Telemetry</div>
-        </div>
+          <div class="act-nav-item active" data-body="earth">
+            <div class="act-badge">03 // HABITABLE</div>
+            <div class="act-name">🜨 EARTH & MOON</div>
+            <div class="act-desc">1.00 AU · Blue Oasis & Life</div>
+          </div>
 
-        <div class="act-nav-item" data-act="6">
-          <div class="act-num">ACT 06 // STELLAR HARVEST</div>
-          <div class="act-name">THE DYSON SPHERE</div>
-          <div class="act-desc">Solar Swarm & Energy Conduit</div>
-        </div>
+          <div class="act-nav-item" data-body="mars">
+            <div class="act-badge">04 // TERRESTRIAL</div>
+            <div class="act-name">♂ MARS</div>
+            <div class="act-desc">1.52 AU · Olympus & Canyons</div>
+          </div>
 
-        <div class="act-nav-item" data-act="7">
-          <div class="act-num">ACT 07 // MULTIVERSE RIFT</div>
-          <div class="act-name">TACHYON STARGATE</div>
-          <div class="act-desc">Ancient Chevrons & Wormhole</div>
-        </div>
+          <div class="act-nav-item" data-body="asteroid_belt">
+            <div class="act-badge">05 // DEBRIS RING</div>
+            <div class="act-name">☄ ASTEROID BELT & CERES</div>
+            <div class="act-desc">2.77 AU · Primordial Rocks</div>
+          </div>
 
-        <div class="act-nav-item" data-act="8">
-          <div class="act-num">ACT 08 // NEBULA CRADLE</div>
-          <div class="act-name">PULSAR VOID NURSERY</div>
-          <div class="act-desc">Relativistic Synchrotron Jets</div>
-        </div>
+          <div class="act-nav-item" data-body="jupiter">
+            <div class="act-badge">06 // GAS GIANT</div>
+            <div class="act-name">♃ JUPITER</div>
+            <div class="act-desc">5.20 AU · Great Red Spot</div>
+          </div>
 
-        <div class="act-nav-item" data-act="9">
-          <div class="act-num">ACT 09 // PRECURSOR SANCTUARY</div>
-          <div class="act-name">4D TESSERACT RUINS</div>
-          <div class="act-desc">Anti-Gravity Obsidian Monoliths</div>
+          <div class="act-nav-item" data-body="saturn">
+            <div class="act-badge">07 // GAS GIANT</div>
+            <div class="act-name">♄ SATURN & RINGS</div>
+            <div class="act-desc">9.58 AU · Majestic Ice Rings</div>
+          </div>
+
+          <div class="act-nav-item" data-body="uranus">
+            <div class="act-badge">08 // ICE GIANT</div>
+            <div class="act-name">⛢ URANUS</div>
+            <div class="act-desc">19.20 AU · 98° Sideways Tilt</div>
+          </div>
+
+          <div class="act-nav-item" data-body="neptune">
+            <div class="act-badge">09 // ICE GIANT</div>
+            <div class="act-name">♆ NEPTUNE</div>
+            <div class="act-desc">30.05 AU · Supersonic Winds</div>
+          </div>
+
+          <div class="act-nav-item" data-body="pluto">
+            <div class="act-badge">10 // DWARF BINARY</div>
+            <div class="act-name">♇ PLUTO & CHARON</div>
+            <div class="act-desc">39.48 AU · Nitrogen Ice Heart</div>
+          </div>
+
+          <div class="act-nav-item" data-body="voyager1">
+            <div class="act-badge">11 // INTERSTELLAR</div>
+            <div class="act-name">🛰 VOYAGER 1 PROBE</div>
+            <div class="act-desc">162.0 AU · Heliopause Crossing</div>
+          </div>
         </div>
       </nav>
 
-      <!-- DIAGNOSTIC TELEMETRY (RIGHT RAIL) -->
-      <aside class="hud-right-rail">
-        <div class="telemetry-card">
+      <!-- NASA/JPL SCIENTIFIC TELEMETRY CARD (RIGHT RAIL) -->
+      <aside class="hud-right-rail" id="telemetry-panel">
+        <div class="telemetry-card main-telemetry">
           <div class="card-header">
-            <span>VESSEL PROPULSION</span>
-            <span>HYPERDRIVE</span>
+            <span id="target-type">TERRESTRIAL PLANET</span>
+            <span id="target-symbol" class="glyph-symbol">🜨</span>
           </div>
-          <div class="warp-gauge">
-            <div id="warp-speed-val" class="warp-speed-val">0.88 C</div>
-            <div class="warp-speed-unit">RELATIVISTIC VELOCITY</div>
+          <h2 id="target-name" class="target-title">EARTH // TERRA</h2>
+          
+          <div class="live-stats-row">
+            <div class="stat-box">
+              <span class="stat-label">ORBITAL VELOCITY</span>
+              <span id="stat-velocity" class="stat-value">29.78 km/s</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">SOLAR DISTANCE</span>
+              <span id="stat-distance" class="stat-value">1.000 AU</span>
+            </div>
           </div>
-          <div class="telemetry-row">
-            <span>WARP RINGS SCORED</span>
-            <span id="ring-score-val" style="color: var(--color-primary); font-weight: bold;">0</span>
-          </div>
-        </div>
 
-        <div class="telemetry-card">
-          <div class="card-header">
-            <span>SHIELD INTEGRITY</span>
-            <span id="shield-val">100.0%</span>
+          <div class="spec-grid">
+            <div class="spec-row">
+              <span class="spec-label">EQUATORIAL RADIUS</span>
+              <span id="stat-radius" class="spec-val">6,371 km</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">PLANETARY MASS</span>
+              <span id="stat-mass" class="spec-val">5.972 × 10²⁴ kg</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">SURFACE GRAVITY</span>
+              <span id="stat-gravity" class="spec-val">9.807 m/s² (1.00 g)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">ESCAPE VELOCITY</span>
+              <span id="stat-escape" class="spec-val">11.19 km/s</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">MEAN TEMPERATURE</span>
+              <span id="stat-temp" class="spec-val">15 °C (288 K)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">SIDEREAL ROTATION</span>
+              <span id="stat-rotation" class="spec-val">23.934 hrs</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">AXIAL TILT</span>
+              <span id="stat-tilt" class="spec-val">23.44°</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">ORBITAL ECCENTRICITY</span>
+              <span id="stat-eccentricity" class="spec-val">0.0167</span>
+            </div>
           </div>
-          <div class="progress-bar-wrap">
-            <div id="shield-bar" class="progress-bar-fill" style="width: 100%;"></div>
+
+          <div class="atmo-section">
+            <div class="atmo-header">ATMOSPHERIC COMPOSITION</div>
+            <div id="stat-atmosphere" class="atmo-breakdown">
+              78.08% N₂, 20.95% O₂, 0.93% Ar, 0.04% CO₂
+            </div>
           </div>
-          <div class="telemetry-row" style="margin-top: 10px;">
-            <span>DEFLECTOR FREQ</span>
-            <span id="deflector-freq-val" style="color: var(--color-primary);">540 THz</span>
-          </div>
-          <div class="telemetry-row">
-            <span>TACHYON LEAKAGE</span>
-            <span id="tachyon-val" style="color: var(--color-success);">0.00%</span>
-          </div>
+
+          <p id="target-description" class="target-desc">
+            The cradle of known life. The only known world with abundant liquid surface water, an active magnetic geodynamo, dynamic plate tectonics, and a nitrogen-oxygen atmosphere.
+          </p>
         </div>
       </aside>
 
-      <!-- FLIGHT SIMULATOR HUD OVERLAY (ACT IV) -->
-      <div id="flight-reticle-hud">
-        <div class="reticle-brackets"></div>
-        <div class="reticle-circle"></div>
-        <div class="reticle-crosshair"></div>
-      </div>
-      <div id="flight-hint" class="flight-controls-hint">
-        STEER: [WASD] | BOOST: [SPACEBAR] | FIRE LASERS: [CLICK / ENTER]
-      </div>
-
-      <!-- AI SUBTITLE & VOICE NARRATOR BANNER -->
+      <!-- AI VOICE & NARRATION BANNER -->
       <div id="ai-subtitle-banner">
         <div class="ai-avatar">
           <div class="ai-avatar-pulse"></div>
         </div>
         <div class="subtitle-content">
-          <div class="subtitle-speaker">AETHEL ONBOARD AI // DIRECTIVE BROADCAST</div>
-          <div id="ai-subtitle-text" class="subtitle-text">Initializing quantum sensory arrays... Stand by for singularity orbital insertion.</div>
+          <div class="subtitle-speaker">MISSION CONTROL // FLIGHT TELEMETRY</div>
+          <div id="ai-subtitle-text" class="subtitle-text">Keplerian Astrodynamics initialized. Line-Wise alignment trajectory locked.</div>
         </div>
       </div>
 
-      <!-- BOTTOM COMMAND DECK -->
+      <!-- BOTTOM ASTRODYNAMICS COMMAND DECK -->
       <footer class="hud-bottom-deck">
         
-        <!-- Camera Director Controls -->
-        <div class="director-suite">
-          <span class="director-label">CAM:</span>
-          <button class="director-btn active" data-cam="director">DIRECTOR</button>
-          <button class="director-btn" data-cam="trailer">TRAILER CUTS</button>
-          <button class="director-btn" data-cam="cockpit">COCKPIT FPV</button>
-          <button class="director-btn" data-cam="free">FREE 360°</button>
+        <!-- Time Warp Controls -->
+        <div class="timewarp-suite">
+          <span class="deck-label">TIME ENGINE:</span>
+          <button id="btn-pause" class="time-btn" title="Pause / Resume Simulation">⏸ PAUSE</button>
+          <button class="time-btn active" data-warp="1">1×</button>
+          <button class="time-btn" data-warp="10">10×</button>
+          <button class="time-btn" data-warp="50">50×</button>
+          <button class="time-btn" data-warp="365">365× (1yr/s)</button>
         </div>
 
-        <!-- Audio Visualizer Center Display -->
+        <!-- Audio Sonification Visualizer -->
         <div class="audio-visualizer-deck">
-          <button id="sound-toggle-btn" class="sound-toggle-btn" title="Toggle Audio (Key: M)">🔊</button>
-          <canvas id="audio-spectrum-canvas" width="140" height="28"></canvas>
-          <button id="braaam-btn" class="hud-btn" style="padding: 4px 10px; font-size: 10px;" title="Trigger Hans Zimmer BRAAAM Horn (Key: B)">BRAAAM [B]</button>
-          <button id="synthwave-btn" class="hud-btn" style="padding: 4px 10px; font-size: 10px;" title="Toggle Cyberpunk Synthwave Beat (Key: S)">SYNTH [S]</button>
-          <button id="sound-lab-btn" class="hud-btn sound-lab-toggle" style="padding: 4px 10px; font-size: 10px; border-color: var(--color-accent);" title="Holographic Kaoss Pad & Sound Lab (Key: L)">SOUND LAB [L]</button>
+          <span class="deck-label">RADIO SONIFICATION:</span>
+          <canvas id="audio-spectrum-canvas" width="130" height="26"></canvas>
+          <button id="radio-pulse-btn" class="hud-btn" style="padding: 4px 8px; font-size: 10px;" title="Trigger Planetary Radio Pulse Sound">PULSE</button>
         </div>
 
-        <!-- Right Tool Controls -->
+        <!-- Display Toggles -->
         <div class="deck-right-tools">
-          <button id="photo-btn" class="hud-btn photo-toggle" title="Capture 4K Wallpaper Screenshot (Key: P)">📸 PHOTO [P]</button>
-          <button id="voice-toggle-btn" class="hud-btn active">AI VOICE: ON</button>
-          <button id="terminal-toggle-btn" class="hud-btn" style="border-color: var(--color-primary);">TERMINAL [T]</button>
+          <button id="toggle-orbits-btn" class="hud-btn active" title="Toggle Keplerian Orbit Lines">ORBITS</button>
+          <button id="toggle-grid-btn" class="hud-btn active" title="Toggle Ecliptic Reference Grid">GRID</button>
+          <button id="toggle-cam-view-btn" class="hud-btn" title="Reset Camera to Target View">RESET CAM</button>
         </div>
       </footer>
 
       <!-- ==================================================================
-           INTERACTIVE HOLO-TERMINAL MODAL
+           ASTRODYNAMICS INTERACTIVE CLI TERMINAL MODAL
            ================================================================== -->
       <div id="terminal-modal" class="terminal-closed">
         <div class="terminal-header">
-          <span>AETHEL TERMINAL v4.9.2</span>
+          <span>NASA/JPL ASTRODYNAMICS CONSOLE v5.2</span>
           <button id="terminal-close-btn" class="terminal-close-btn">✕</button>
         </div>
         <div id="terminal-body" class="terminal-body"></div>
         <div class="terminal-input-row">
-          <span class="term-prompt">ROOT@AETHEL:~#</span>
-          <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" placeholder="Type 'help', 'warp 2', 'braaam'...">
+          <span class="term-prompt">FLIGHT_DIR@SOL:~#</span>
+          <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" placeholder="Commands: 'goto mars', 'linewise', 'helio', 'timewarp 50', 'calc earth', 'tour', 'help'...">
         </div>
       </div>
 
-      <!-- ==================================================================
-           MULTIVERSE CODEX MODAL (ACT V)
-           ================================================================== -->
-      <div id="codex-modal">
-        <div class="codex-header">
-          <div id="codex-title" class="codex-title">STELLAR CODEX // EXOPLANET AETHEL-PRIME</div>
-          <button id="codex-close-btn" class="terminal-close-btn" style="font-size: 20px;">✕</button>
-        </div>
-
-        <!-- Codex Planetary Target Selectors -->
-        <div class="codex-tabs-bar">
-          <button class="codex-tab-btn active" data-target="aethel">AETHEL-PRIME</button>
-          <button class="codex-tab-btn" data-target="gargantua">GARGANTUA</button>
-          <button class="codex-tab-btn" data-target="neobabylon">NEO-BABYLON</button>
-          <button class="codex-tab-btn" data-target="dysonsol">DYSON SOL</button>
-          <button class="codex-tab-btn" data-target="stargate">STARGATE</button>
-          <button class="codex-tab-btn" data-target="pulsar">PULSAR</button>
-          <button class="codex-tab-btn" data-target="tesseract">TESSERACT</button>
-        </div>
-
-        <div class="codex-grid">
-          <div class="codex-preview-box">
-            <img id="codex-img" src="assets/exoplanet.jpg" alt="Exoplanet Aethel-Prime" class="codex-img">
-          </div>
-          <div class="codex-info">
-            <p id="codex-desc">
-              Aethel-Prime is a super-terrestrial world orbiting at the inner rim of the Cygnus Rift. Its bioluminescent tectonic continents resonate with sub-space tachyon frequencies, creating perpetual auroral energy rings.
-            </p>
-            <div class="codex-metric-grid">
-              <div class="codex-metric">
-                <label>MASS</label>
-                <span id="codex-mass">2.48 EARTH MASSES</span>
-              </div>
-              <div class="codex-metric">
-                <label>SURFACE GRAVITY</label>
-                <span id="codex-gravity">1.34 G</span>
-              </div>
-              <div class="codex-metric">
-                <label>ATMOSPHERE</label>
-                <span id="codex-atmosphere">N2 / O2 / XENON</span>
-              </div>
-              <div class="codex-metric">
-                <label>HABITABILITY</label>
-                <span id="codex-habitability">CLASS IX HARMONIC</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ==================================================================
-           PHOTO MODE NOTIFICATION
-           ================================================================== -->
-      <div id="photo-flash-notice">📸 CINEMATIC 4K FRAME CAPTURED & SAVED</div>
-
-      <!-- ==================================================================
-           SOUND LAB: HOLOGRAPHIC KAOSS PAD & AUDIO FX STUDIO
-           ================================================================== -->
-      <div id="sound-lab-modal">
-        <div class="lab-header">
-          <span>AETHEL SOUND LAB // AUDIO FX & KAOSS PAD</span>
-          <button id="sound-lab-close-btn" class="terminal-close-btn" style="font-size: 20px;">✕</button>
-        </div>
-
-        <div id="kaoss-readout" class="kaoss-readout">CUTOFF: 20,000 Hz | RESONANCE Q: 1.0</div>
-
-        <div class="kaoss-pad-container" id="kaoss-pad">
-          <div class="kaoss-crosshair" id="kaoss-crosshair"></div>
-          <span class="kaoss-label-y">▲ RESONANCE [Q]</span>
-          <span class="kaoss-label-x">FILTER CUTOFF [Hz] ▶</span>
-        </div>
-
-        <div class="sound-triggers-grid">
-          <button class="sound-pad-btn" data-sfx="braaam">BRAAAM HORN</button>
-          <button class="sound-pad-btn" data-sfx="impact">SUB IMPACT</button>
-          <button class="sound-pad-btn" data-sfx="warp">WARP JUMP</button>
-          <button class="sound-pad-btn" data-sfx="laser">LASER VOLLEY</button>
-          <button class="sound-pad-btn" data-sfx="explosion">EXPLOSION</button>
-          <button class="sound-pad-btn" data-sfx="ping">SCANNER PING</button>
-        </div>
-
-        <div class="sound-presets-bar">
-          <button class="preset-pill active" data-preset="interstellar">INTERSTELLAR</button>
-          <button class="preset-pill" data-preset="bladerunner">BLADE RUNNER</button>
-          <button class="preset-pill" data-preset="darkvoid">DARK VOID</button>
-          <button class="preset-pill" data-preset="supernova">SUPERNOVA</button>
-        </div>
-      </div>
+      <!-- Screenshot Flash Notification -->
+      <div id="photo-flash-notice">📸 HIGH-RESOLUTION 4K FRAME CAPTURED & SAVED</div>
 
     </div>
 
@@ -365,11 +338,11 @@
 
   </main>
 
-  <!-- Local Offline-Capable Libraries -->
+  <!-- Local Offline Three.js Libraries -->
   <script src="libs/three.min.js"></script>
   <script src="libs/OrbitControls.js"></script>
 
-  <!-- Application Modules -->
+  <!-- Astrodynamic Simulation Modules -->
   <script src="js/shaders/custom-shaders.js"></script>
   <script src="js/audio/audio-engine.js"></script>
   <script src="js/audio/voice-narrator.js"></script>
