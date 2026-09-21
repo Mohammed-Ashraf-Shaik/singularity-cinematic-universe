@@ -1570,28 +1570,55 @@ class SceneManager {
   startGrandTour() {
     this.cameraMode = 'tour';
     this.tourIndex = 0;
-    this.tourTimer = 0;
-    this.focusOn(this.celestialData[0].id, true);
+    this.tourWaitingForNext = false;
+    this.tourPostSpeechTimer = 0;
+    this.playTourStep(0);
   }
 
   stopGrandTour() {
     this.cameraMode = 'focus';
+    this.tourWaitingForNext = false;
+    this.tourPostSpeechTimer = 0;
+    if (window.voiceNarrator) {
+      window.voiceNarrator.stop();
+    }
+  }
+
+  playTourStep(index) {
+    if (this.cameraMode !== 'tour') return;
+    this.tourIndex = index % this.celestialData.length;
+    const bodyData = this.celestialData[this.tourIndex];
+    this.focusOn(bodyData.id, true);
+
+    if (window.hudManager) {
+      window.hudManager.selectBody(bodyData.id, false);
+    }
+
+    const narrationText = `Approaching ${bodyData.name}. ${bodyData.desc}`;
+
+    if (window.voiceNarrator) {
+      window.voiceNarrator.speak(narrationText, true, () => {
+        if (this.cameraMode === 'tour') {
+          this.tourWaitingForNext = true;
+          this.tourPostSpeechTimer = 0;
+        }
+      });
+    } else {
+      this.tourWaitingForNext = true;
+      this.tourPostSpeechTimer = 0;
+    }
   }
 
   updateTour(delta) {
     if (this.cameraMode !== 'tour') return;
 
-    this.tourTimer += delta;
-    if (this.tourTimer >= this.tourDuration) {
-      this.tourTimer = 0;
-      this.tourIndex = (this.tourIndex + 1) % this.celestialData.length;
-      const nextBodyId = this.celestialData[this.tourIndex].id;
-      this.focusOn(nextBodyId, true);
-
-      // Trigger narration and HUD sync if available
-      if (window.voiceNarrator) {
-        const data = this.celestialData[this.tourIndex];
-        window.voiceNarrator.speak(`Approaching ${data.name}. ${data.desc}`, true);
+    if (this.tourWaitingForNext) {
+      this.tourPostSpeechTimer += delta;
+      // Graceful 2.5 second pause after narration concludes before gliding to next world
+      if (this.tourPostSpeechTimer >= 2.5) {
+        this.tourWaitingForNext = false;
+        this.tourPostSpeechTimer = 0;
+        this.playTourStep(this.tourIndex + 1);
       }
     }
   }

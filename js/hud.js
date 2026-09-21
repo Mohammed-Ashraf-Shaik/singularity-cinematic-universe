@@ -226,7 +226,7 @@ class HUDManager {
   // --------------------------------------------------------------------------
   // 2. CELESTIAL SELECTION & TELEMETRY CARD UPDATING
   // --------------------------------------------------------------------------
-  selectBody(bodyId) {
+  selectBody(bodyId, triggerSpeech = true) {
     this.currentBodyId = bodyId;
     this.sm.focusOn(bodyId, true);
 
@@ -249,8 +249,11 @@ class HUDManager {
 
     // Narrator announcement
     const body = this.sm.celestialBodies[bodyId];
-    if (body && window.voiceNarrator) {
+    if (body) {
       this.setBannerText(`Target locked: ${body.data.name}. Distance: ${body.data.semiMajorAxisAU} AU. ${body.data.desc}`);
+      if (triggerSpeech && window.voiceNarrator && this.sm.cameraMode !== 'tour') {
+        window.voiceNarrator.speak(`Target locked: ${body.data.name}. ${body.data.desc}`, true);
+      }
     }
   }
 
@@ -317,7 +320,7 @@ class HUDManager {
 
       // Check if Grand Tour has changed the active body
       if (this.sm.cameraMode === 'tour' && this.sm.selectedBodyId !== this.currentBodyId) {
-        this.selectBody(this.sm.selectedBodyId);
+        this.selectBody(this.sm.selectedBodyId, false);
       }
     }
 
