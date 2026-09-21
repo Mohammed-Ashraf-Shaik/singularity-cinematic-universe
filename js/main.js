@@ -25,20 +25,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Engage Reactor / Boot Audio & Visuals
   const engageExperience = async () => {
+    // Fade out bootstrap modal immediately
+    if (initModal) {
+      initModal.classList.add('hidden');
+    }
+
     if (window.audioEngine) {
-      await window.audioEngine.init();
-      window.audioEngine.playBraaam();
+      try {
+        await window.audioEngine.init();
+        window.audioEngine.playBraaam();
+      } catch (err) {
+        console.warn('AudioEngine init error:', err);
+      }
     }
 
     if (window.voiceNarrator) {
       setTimeout(() => {
-        window.voiceNarrator.speak("Singularity Protocol engaged. All quantum cores synchronized. Welcome to Project Aethel.", true);
+        try {
+          window.voiceNarrator.speak("Singularity Protocol engaged. All quantum cores synchronized. Welcome to Project Aethel.", true);
+        } catch (err) {
+          console.warn('Voice narrator error:', err);
+        }
       }, 1000);
-    }
-
-    // Fade out bootstrap modal
-    if (initModal) {
-      initModal.classList.add('hidden');
     }
   };
 

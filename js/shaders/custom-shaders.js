@@ -349,6 +349,109 @@ const CustomShaders = {
         gl_FragColor = vec4(col * 1.6, alpha);
       }
     `
+  },
+
+  // --------------------------------------------------------------------------
+  // 6. RELATIVISTIC PULSAR SYNCHROTRON BEAM SHADER
+  // --------------------------------------------------------------------------
+  PulsarBeam: {
+    uniforms: {
+      time: { value: 0 },
+      beamColor: { value: new THREE.Color(0x70d0ff) },
+      coreColor: { value: new THREE.Color(0xffffff) },
+      audioIntensity: { value: 0.0 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vPosition;
+
+      void main() {
+        vUv = uv;
+        vPosition = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 beamColor;
+      uniform vec3 coreColor;
+      uniform float audioIntensity;
+
+      varying vec2 vUv;
+      varying vec3 vPosition;
+
+      void main() {
+        // Distance from central axis (x = 0.5)
+        float distFromCenter = abs(vUv.x - 0.5) * 2.0;
+
+        // Taper along length (y axis)
+        float lengthTaper = 1.0 - smoothstep(0.0, 1.0, vUv.y);
+
+        // Core intensity
+        float core = 1.0 - smoothstep(0.0, 0.25, distFromCenter);
+        float aura = 1.0 - smoothstep(0.1, 1.0, distFromCenter);
+
+        // Spiral energy waves moving up the beam
+        float waves = sin(vUv.y * 40.0 - time * 12.0) * 0.5 + 0.5;
+
+        vec3 col = mix(beamColor, coreColor, core);
+        col += vec3(0.5, 0.8, 1.0) * waves * 0.4 + audioIntensity * 0.3;
+
+        float alpha = (core * 0.95 + aura * 0.45) * lengthTaper;
+        gl_FragColor = vec4(col * 2.0, alpha);
+      }
+    `
+  },
+
+  // --------------------------------------------------------------------------
+  // 7. TESSERACT 4D HYPERCUBE FRESNEL ENERGY SHADER
+  // --------------------------------------------------------------------------
+  TesseractHypercube: {
+    uniforms: {
+      time: { value: 0 },
+      edgeColor: { value: new THREE.Color(0x00f0ff) },
+      goldColor: { value: new THREE.Color(0xffaa00) },
+      audioIntensity: { value: 0.0 }
+    },
+    vertexShader: `
+      varying vec3 vNormal;
+      varying vec3 vWorldPos;
+      varying vec2 vUv;
+
+      void main() {
+        vUv = uv;
+        vNormal = normalize(normalMatrix * normal);
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vWorldPos = worldPos.xyz;
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 edgeColor;
+      uniform vec3 goldColor;
+      uniform float audioIntensity;
+
+      varying vec3 vNormal;
+      varying vec3 vWorldPos;
+      varying vec2 vUv;
+
+      void main() {
+        vec3 viewDir = normalize(cameraPosition - vWorldPos);
+        float fresnel = 1.0 - max(dot(viewDir, vNormal), 0.0);
+        fresnel = pow(fresnel, 3.0);
+
+        // Dimensional glyph coordinate scanlines
+        float glyphs = sin(vUv.x * 30.0 + time * 2.0) * sin(vUv.y * 30.0 - time * 2.0);
+        glyphs = pow(clamp(glyphs, 0.0, 1.0), 4.0);
+
+        vec3 col = mix(edgeColor, goldColor, sin(time + vWorldPos.y * 0.5) * 0.5 + 0.5);
+        col += goldColor * glyphs * 1.5;
+
+        float alpha = clamp(fresnel * 1.2 + glyphs * 0.8 + audioIntensity * 0.3, 0.2, 0.95);
+        gl_FragColor = vec4(col * (1.5 + fresnel * 2.0), alpha);
+      }
+    `
   }
 };
 

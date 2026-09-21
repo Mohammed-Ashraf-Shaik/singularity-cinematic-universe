@@ -72,7 +72,7 @@ class SceneManager {
     this.dirLight.position.set(40, 60, 30);
     this.scene.add(this.dirLight);
 
-    // 5. Build All 7 Cinematic Acts
+    // 5. Build All 9 Cinematic Acts
     this.buildAct1_Singularity();
     this.buildAct2_Cyberpunk();
     this.buildAct3_Quantum();
@@ -80,6 +80,8 @@ class SceneManager {
     this.buildAct5_MultiverseCodex();
     this.buildAct6_DysonSphere();
     this.buildAct7_Stargate();
+    this.buildAct8_NebulaCradle();
+    this.buildAct9_AncientRuins();
 
     // 6. Set Act 1 Active
     this.setActiveAct(1, true);
@@ -884,6 +886,209 @@ class SceneManager {
   }
 
   // ==========================================================================
+  // ACT VIII: THE NEBULA VOID CRADLE (PULSAR SYNCHROTRON JETS)
+  // ==========================================================================
+  buildAct8_NebulaCradle() {
+    const group = new THREE.Group();
+    group.name = 'Act8_NebulaCradle';
+
+    // Skybox with Pulsar Backdrop
+    const pulsarSkyGeo = new THREE.SphereGeometry(800, 32, 32);
+    const textureLoader = new THREE.TextureLoader();
+    const pulsarTex = textureLoader.load('assets/pulsar.jpg');
+    pulsarTex.wrapS = THREE.RepeatWrapping;
+    pulsarTex.repeat.set(2, 1);
+    group.add(new THREE.Mesh(pulsarSkyGeo, new THREE.MeshBasicMaterial({ map: pulsarTex, side: THREE.BackSide })));
+
+    // 1. Central Spinning Pulsar / Neutron Star
+    const pulsarGroup = new THREE.Group();
+    pulsarGroup.name = 'pulsarCoreGroup';
+
+    const starGeo = new THREE.SphereGeometry(2.4, 48, 48);
+    const starMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const starMesh = new THREE.Mesh(starGeo, starMat);
+    pulsarGroup.add(starMesh);
+
+    // Blinding Inner Aura
+    const auraLight = new THREE.PointLight(0x70d8ff, 4.0, 160);
+    pulsarGroup.add(auraLight);
+
+    // 2. Dual Relativistic Synchrotron Beams (North & South Poles)
+    const beamGeo = new THREE.CylinderGeometry(0.8, 14.0, 140, 32, 1, true);
+    beamGeo.translate(0, 70, 0); // Origin at pole
+
+    const beamMatNorth = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.PulsarBeam.vertexShader,
+      fragmentShader: window.CustomShaders.PulsarBeam.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.PulsarBeam.uniforms),
+      side: THREE.DoubleSide,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const northBeam = new THREE.Mesh(beamGeo, beamMatNorth);
+    northBeam.name = 'northBeam';
+    pulsarGroup.add(northBeam);
+
+    const beamMatSouth = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.PulsarBeam.vertexShader,
+      fragmentShader: window.CustomShaders.PulsarBeam.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.PulsarBeam.uniforms),
+      side: THREE.DoubleSide,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const southBeam = new THREE.Mesh(beamGeo, beamMatSouth);
+    southBeam.rotation.x = Math.PI; // Point south
+    southBeam.name = 'southBeam';
+    pulsarGroup.add(southBeam);
+
+    // Magnetic field tilt
+    pulsarGroup.rotation.z = 0.55;
+    pulsarGroup.rotation.x = 0.25;
+    group.add(pulsarGroup);
+
+    // 3. Dense Volumetric Nebula Dust Cloud
+    const dustCount = 3500;
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPositions = new Float32Array(dustCount * 3);
+    const dustColors = new Float32Array(dustCount * 3);
+
+    const colorPalette = [
+      new THREE.Color(0x00f0ff), // Cyan
+      new THREE.Color(0xb026ff), // Magenta/Purple
+      new THREE.Color(0xffaa00), // Gold
+      new THREE.Color(0xff0066)  // Crimson
+    ];
+
+    for (let i = 0; i < dustCount; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const r = 8 + Math.random() * 55;
+      dustPositions[i * 3] = r * Math.cos(theta);
+      dustPositions[i * 3 + 1] = (Math.random() - 0.5) * (r * 0.4 + 10);
+      dustPositions[i * 3 + 2] = r * Math.sin(theta);
+
+      const col = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      dustColors[i * 3] = col.r;
+      dustColors[i * 3 + 1] = col.g;
+      dustColors[i * 3 + 2] = col.b;
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
+    dustGeo.setAttribute('color', new THREE.BufferAttribute(dustColors, 3));
+
+    const dustMat = new THREE.PointsMaterial({
+      size: 0.45,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const nebulaDust = new THREE.Points(dustGeo, dustMat);
+    nebulaDust.name = 'nebulaDustField';
+    group.add(nebulaDust);
+
+    this.scene.add(group);
+    this.actGroups[7] = group;
+  }
+
+  // ==========================================================================
+  // ACT IX: THE ANCIENT PRECURSOR RUINS (4D TESSERACT SANCTUARY)
+  // ==========================================================================
+  buildAct9_AncientRuins() {
+    const group = new THREE.Group();
+    group.name = 'Act9_AncientRuins';
+
+    // Skybox with Monolith Backdrop
+    const monolithSkyGeo = new THREE.SphereGeometry(800, 32, 32);
+    const textureLoader = new THREE.TextureLoader();
+    const monolithTex = textureLoader.load('assets/monolith.jpg');
+    monolithTex.wrapS = THREE.RepeatWrapping;
+    monolithTex.repeat.set(2, 1);
+    group.add(new THREE.Mesh(monolithSkyGeo, new THREE.MeshBasicMaterial({ map: monolithTex, side: THREE.BackSide })));
+
+    // 1. Ring of 12 Floating Obsidian Monolith Pillars
+    const monolithGroup = new THREE.Group();
+    monolithGroup.name = 'floatingMonoliths';
+
+    const pillarGeo = new THREE.BoxGeometry(2.4, 24.0, 3.2);
+    const pillarMat = new THREE.MeshStandardMaterial({
+      color: 0x0a101a,
+      metalness: 0.95,
+      roughness: 0.1,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 0.35
+    });
+
+    const monolithCount = 12;
+    const ringRadius = 32;
+
+    for (let i = 0; i < monolithCount; i++) {
+      const angle = (i / monolithCount) * Math.PI * 2;
+      const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+      pillar.position.set(ringRadius * Math.cos(angle), 0, ringRadius * Math.sin(angle));
+      pillar.rotation.y = -angle;
+      pillar.userData = {
+        baseY: 0,
+        bobSpeed: 0.8 + Math.random() * 0.4,
+        phase: Math.random() * Math.PI * 2
+      };
+      monolithGroup.add(pillar);
+    }
+    group.add(monolithGroup);
+
+    // 2. Central 4D Levitating Tesseract Hypercube
+    const tesseractGroup = new THREE.Group();
+    tesseractGroup.name = 'tesseractCore';
+
+    // Outer Hypercube Frame
+    const outerCubeGeo = new THREE.BoxGeometry(8, 8, 8);
+    const outerCubeMat = new THREE.ShaderMaterial({
+      vertexShader: window.CustomShaders.TesseractHypercube.vertexShader,
+      fragmentShader: window.CustomShaders.TesseractHypercube.fragmentShader,
+      uniforms: THREE.UniformsUtils.clone(window.CustomShaders.TesseractHypercube.uniforms),
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    const outerCube = new THREE.Mesh(outerCubeGeo, outerCubeMat);
+    outerCube.name = 'tesseractOuter';
+    tesseractGroup.add(outerCube);
+
+    // Inner Dimensional Core Cube
+    const innerCubeGeo = new THREE.BoxGeometry(4.2, 4.2, 4.2);
+    const innerCubeMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0xffaa00,
+      emissiveIntensity: 1.2,
+      wireframe: true
+    });
+    const innerCube = new THREE.Mesh(innerCubeGeo, innerCubeMat);
+    innerCube.name = 'tesseractInner';
+    tesseractGroup.add(innerCube);
+
+    // Central Singularity Beacon
+    const coreLight = new THREE.PointLight(0x00ffff, 3.0, 80);
+    tesseractGroup.add(coreLight);
+
+    // Levitating Concentric Glyph Rings
+    const runeRingGeo = new THREE.TorusGeometry(14, 0.25, 16, 80);
+    const runeRingMat = new THREE.MeshBasicMaterial({
+      color: 0xffaa00,
+      transparent: true,
+      opacity: 0.8
+    });
+    const runeRing = new THREE.Mesh(runeRingGeo, runeRingMat);
+    runeRing.rotation.x = Math.PI / 2;
+    runeRing.name = 'runeRing';
+    tesseractGroup.add(runeRing);
+
+    group.add(tesseractGroup);
+
+    this.scene.add(group);
+    this.actGroups[8] = group;
+  }
+
+  // ==========================================================================
   // SCENE TRANSITIONS & ACT SWITCHING
   // ==========================================================================
   setActiveAct(actNumber, instant = false) {
@@ -927,6 +1132,12 @@ class SceneManager {
     } else if (actNumber === 7) {
       this.camera.position.set(0, 4, 32);
       this.cameraTarget.set(0, 0, 0);
+    } else if (actNumber === 8) {
+      this.camera.position.set(0, 18, 55);
+      this.cameraTarget.set(0, 0, 0);
+    } else if (actNumber === 9) {
+      this.camera.position.set(0, 12, 42);
+      this.cameraTarget.set(0, 0, 0);
     }
 
     // Voice commentary
@@ -938,7 +1149,9 @@ class SceneManager {
         4: "Act Four: Hyperspace Flight Simulator engaged. Use WASD to steer and click to fire plasma cannons.",
         5: "Act Five: Multiverse Codex archive unlocked. Scanning planetary frequency and orbital beacons.",
         6: "Act Six: The Dyson Sphere Stellar Harvester. Solar energy flux 3.8 yottawatts. Collector swarm aligned.",
-        7: "Act Seven: The Tachyon Stargate. Dimensional rift open. Multiverse bridge synchronized."
+        7: "Act Seven: The Tachyon Stargate. Dimensional rift open. Multiverse bridge synchronized.",
+        8: "Act Eight: The Nebula Cradle. Relativistic synchrotron jets detected from spinning pulsar.",
+        9: "Act Nine: The Ancient Precursor Ruins. 4D Tesseract hypercube resonance synchronized."
       };
       window.voiceNarrator.speak(commentaries[actNumber], true);
     }
@@ -1214,6 +1427,14 @@ class SceneManager {
             this.camera.position.x += (Math.random() - 0.5) * 0.8;
             this.camera.position.y += (Math.random() - 0.5) * 0.8;
             if (window.voiceNarrator) window.voiceNarrator.speak("Warning: Micrometeorite impact. Deflector shield absorbed shockwave.", false);
+          } else if (debris.position.z > 15) {
+            debris.position.z = -300 - Math.random() * 50;
+            debris.position.x = (Math.random() - 0.5) * 11;
+            debris.position.y = (Math.random() - 0.5) * 8;
+          }
+        });
+      }
+
       // Update Laser Projectiles & Check Hits on Debris
       if (this.lasers && this.lasers.length > 0) {
         for (let l = this.lasers.length - 1; l >= 0; l--) {
@@ -1320,6 +1541,63 @@ class SceneManager {
     }
 
     // ------------------------------------------------------------------------
+    // ACT 8 UPDATE: NEBULA CRADLE
+    // ------------------------------------------------------------------------
+    else if (this.currentAct === 8) {
+      const g = this.actGroups[7];
+      const pulsarGroup = g.getObjectByName('pulsarCoreGroup');
+      if (pulsarGroup) {
+        pulsarGroup.rotation.y = elapsedTime * 4.0; // Rapid pulsar spin!
+        const north = pulsarGroup.getObjectByName('northBeam');
+        if (north) {
+          north.material.uniforms.time.value = elapsedTime;
+          north.material.uniforms.audioIntensity.value = audioIntensity;
+        }
+        const south = pulsarGroup.getObjectByName('southBeam');
+        if (south) {
+          south.material.uniforms.time.value = elapsedTime;
+          south.material.uniforms.audioIntensity.value = audioIntensity;
+        }
+      }
+      const dust = g.getObjectByName('nebulaDustField');
+      if (dust) {
+        dust.rotation.y = elapsedTime * 0.02;
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // ACT 9 UPDATE: ANCIENT RUINS
+    // ------------------------------------------------------------------------
+    else if (this.currentAct === 9) {
+      const g = this.actGroups[8];
+      const monoliths = g.getObjectByName('floatingMonoliths');
+      if (monoliths) {
+        monoliths.children.forEach(pillar => {
+          pillar.position.y = Math.sin(elapsedTime * pillar.userData.bobSpeed + pillar.userData.phase) * 2.2;
+        });
+      }
+      const tesseract = g.getObjectByName('tesseractCore');
+      if (tesseract) {
+        const outer = tesseract.getObjectByName('tesseractOuter');
+        if (outer) {
+          outer.material.uniforms.time.value = elapsedTime;
+          outer.material.uniforms.audioIntensity.value = audioIntensity;
+          outer.rotation.x = elapsedTime * 0.3;
+          outer.rotation.y = elapsedTime * 0.4;
+        }
+        const inner = tesseract.getObjectByName('tesseractInner');
+        if (inner) {
+          inner.rotation.x = -elapsedTime * 0.6;
+          inner.rotation.z = -elapsedTime * 0.5;
+        }
+        const rune = tesseract.getObjectByName('runeRing');
+        if (rune) {
+          rune.rotation.z = elapsedTime * 0.2;
+        }
+      }
+    }
+
+    // ------------------------------------------------------------------------
     // CAMERA CHOREOGRAPHY
     // ------------------------------------------------------------------------
     // Handheld micro-shake for cinematic realism
@@ -1403,6 +1681,19 @@ class SceneManager {
         this.camera.position.y = 4 + Math.cos(elapsedTime * 0.15) * 3 + shakeY;
         this.camera.position.z = 28 + Math.sin(elapsedTime * 0.1) * 5;
         this.camera.lookAt(0, 0, 0);
+      } else if (this.currentAct === 8) {
+        // High orbital pass over pulsar synchrotron jet
+        const p8Angle = elapsedTime * 0.14;
+        this.camera.position.x = Math.cos(p8Angle) * 48 + shakeX;
+        this.camera.position.z = Math.sin(p8Angle) * 48;
+        this.camera.position.y = 22 + Math.sin(elapsedTime * 0.25) * 8 + shakeY;
+        this.camera.lookAt(0, 0, 0);
+      } else if (this.currentAct === 9) {
+        // Low-angle dramatic look up at the floating Tesseract and Monoliths
+        this.camera.position.x = Math.sin(elapsedTime * 0.1) * 28 + shakeX;
+        this.camera.position.z = Math.cos(elapsedTime * 0.1) * 28;
+        this.camera.position.y = 8 + Math.sin(elapsedTime * 0.2) * 4 + shakeY;
+        this.camera.lookAt(0, 4, 0);
       }
     } else if (this.cameraMode === 'cockpit') {
       if (this.currentAct === 4 && this.ship) {

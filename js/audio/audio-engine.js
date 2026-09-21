@@ -58,9 +58,16 @@ class AudioEngine {
       this.sfxGain = this.ctx.createGain();
       this.sfxGain.gain.setValueAtTime(0.6, this.ctx.currentTime);
 
-      // Route graph: Drone/SFX -> MasterGain -> Analyser -> Destination
-      this.droneGain.connect(this.masterGain);
-      this.sfxGain.connect(this.masterGain);
+      // Holographic Master Filter (Kaoss Pad Cutoff & Resonance Control)
+      this.masterFilter = this.ctx.createBiquadFilter();
+      this.masterFilter.type = 'lowpass';
+      this.masterFilter.frequency.setValueAtTime(20000, this.ctx.currentTime);
+      this.masterFilter.Q.setValueAtTime(1.0, this.ctx.currentTime);
+
+      // Route graph: Drone/SFX -> MasterFilter -> MasterGain -> Analyser -> Destination
+      this.droneGain.connect(this.masterFilter);
+      this.sfxGain.connect(this.masterFilter);
+      this.masterFilter.connect(this.masterGain);
       this.masterGain.connect(this.analyser);
       this.analyser.connect(this.ctx.destination);
 
@@ -71,7 +78,7 @@ class AudioEngine {
       this.isInitialized = true;
       this.startAmbientDroneSequence();
       this.initThrusterEngine();
-      console.log('🌌 [AudioEngine] Initialized procedural soundscape.');
+      console.log('🌌 [AudioEngine] Initialized procedural soundscape with Master Filter.');
     } catch (err) {
       console.warn('AudioContext init error:', err);
     }
@@ -506,13 +513,63 @@ class AudioEngine {
     this.synthTimer = setTimeout(() => this.runSynthwaveStep(), 117);
   }
 
-  // Set Filter Cutoff for dynamic lowpass filtering
-  setFilterCutoff(freq) {
-    if (!this.ctx) return;
-    const clamped = Math.max(100, Math.min(18000, freq));
-    this.droneOscillators.forEach(({ osc, gain }) => {
-      // Find connected filter if any
-    });
+  // Set Filter Parameters via Kaoss Pad (nx: 0..1 cutoff, ny: 0..1 resonance)
+  setFilterParams(nx, ny) {
+    if (!this.ctx || !this.masterFilter) return;
+    const now = this.ctx.currentTime;
+    // Logarithmic cutoff: 120 Hz to 20,000 Hz
+    const freq = 120 * Math.pow(20000 / 120, Math.max(0, Math.min(1, nx)));
+    // Resonance Q: 0.5 to 18.0
+    const q = 0.5 + Math.max(0, Math.min(1, ny)) * 17.5;
+
+    this.masterFilter.frequency.setTargetAtTime(freq, now, 0.02);
+    this.masterFilter.Q.setTargetAtTime(q, now, 0.02);
+  }
+
+  // Rapid Laser Volley SFX
+  playLaserVolley() {
+    this.playLaserShot();
+    setTimeout(() => this.playLaserShot(), 90);
+    setTimeout(() => this.playLaserShot(), 180);
+  }
+
+  // 4K Photo Shutter Chirp + Mechanical Aperture Click
+  playShutterChirp() {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(2400, now);
+    osc.frequency.exponentialRampToValueAtTime(700, now + 0.08);
+
+    gain.gain.setValueAtTime(0.45, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(now);
+    osc.stop(now + 0.1);
+
+    // Secondary shutter mechanical click
+    setTimeout(() => {
+      if (!this.ctx || this.isMuted) return;
+      const t = this.ctx.currentTime;
+      const osc2 = this.ctx.createOscillator();
+      const gain2 = this.ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(1400, t);
+      osc2.frequency.exponentialRampToValueAtTime(280, t + 0.05);
+      gain2.gain.setValueAtTime(0.3, t);
+      gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+      osc2.connect(gain2);
+      gain2.connect(this.sfxGain);
+      osc2.start(t);
+      osc2.stop(t + 0.07);
+    }, 85);
   }
 
   // Audio Soundscape Presets

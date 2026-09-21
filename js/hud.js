@@ -20,6 +20,16 @@ class HUDManager {
     this.flightHint = document.getElementById('flight-hint');
     this.codexModal = document.getElementById('codex-modal');
 
+    // Sound Lab & Photo Mode Elements
+    this.soundLabModal = document.getElementById('sound-lab-modal');
+    this.soundLabBtn = document.getElementById('sound-lab-btn');
+    this.soundLabCloseBtn = document.getElementById('sound-lab-close-btn');
+    this.kaossPad = document.getElementById('kaoss-pad');
+    this.kaossCrosshair = document.getElementById('kaoss-crosshair');
+    this.photoBtn = document.getElementById('photo-btn');
+    this.photoNotice = document.getElementById('photo-flash-notice');
+    this.isDraggingKaoss = false;
+
     // Letterbox & Aspect Ratio
     this.aspectRatioMode = '16:9'; // 'cinemascope', '16:9', '4:3'
     this.isHudVisible = true;
@@ -144,6 +154,82 @@ class HUDManager {
       });
     }
 
+    // 12. Sound Lab Toggle Buttons
+    const soundLabBtns = document.querySelectorAll('#sound-lab-btn, #sound-lab-btn-top, .sound-lab-toggle');
+    soundLabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.toggleSoundLab();
+      });
+    });
+
+    // 13. Sound Lab Close Button
+    if (this.soundLabCloseBtn) {
+      this.soundLabCloseBtn.addEventListener('click', () => {
+        if (this.soundLabModal) this.soundLabModal.classList.remove('active');
+        if (window.audioEngine) window.audioEngine.playHoloBeep(600, 'sine');
+      });
+    }
+
+    // 14. Holographic Kaoss Pad Pointer Interaction (Cutoff & Resonance Modulation)
+    if (this.kaossPad) {
+      const onKaossMove = (e) => {
+        if (!this.isDraggingKaoss && e.type !== 'pointerdown') return;
+        this.handleKaossPointer(e);
+      };
+
+      this.kaossPad.addEventListener('pointerdown', (e) => {
+        this.isDraggingKaoss = true;
+        try { this.kaossPad.setPointerCapture(e.pointerId); } catch (_) {}
+        onKaossMove(e);
+      });
+
+      this.kaossPad.addEventListener('pointermove', onKaossMove);
+
+      const endKaoss = (e) => {
+        if (this.isDraggingKaoss) {
+          this.isDraggingKaoss = false;
+          try { this.kaossPad.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+      };
+      this.kaossPad.addEventListener('pointerup', endKaoss);
+      this.kaossPad.addEventListener('pointercancel', endKaoss);
+    }
+
+    // 15. Sound Trigger Grid Buttons
+    const soundPads = document.querySelectorAll('.sound-pad-btn');
+    soundPads.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sfx = btn.getAttribute('data-sfx');
+        if (!window.audioEngine) return;
+        if (sfx === 'braaam') window.audioEngine.playBraaam();
+        else if (sfx === 'impact') window.audioEngine.playSubImpact();
+        else if (sfx === 'warp') window.audioEngine.playWarpJump();
+        else if (sfx === 'laser') window.audioEngine.playLaserVolley();
+        btn.classList.add('active');
+        setTimeout(() => btn.classList.remove('active'), 180);
+      });
+    });
+
+    // 16. Soundscape Preset Pills
+    const presetPills = document.querySelectorAll('.preset-pill');
+    presetPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        presetPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const preset = pill.getAttribute('data-preset');
+        if (window.audioEngine) window.audioEngine.setPreset(preset);
+        this.terminal.printLine(`AUDIO PRESET LOADED: [${preset.toUpperCase()}]`, "info");
+      });
+    });
+
+    // 17. 4K Cinematic Photo Screenshot Buttons
+    const photoBtns = document.querySelectorAll('#photo-btn, #photo-btn-top, .photo-toggle');
+    photoBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.captureScreenshot();
+      });
+    });
+
     // Global Key Shortcuts
     window.addEventListener('keydown', (e) => {
       const k = e.key.toLowerCase();
@@ -151,6 +237,12 @@ class HUDManager {
 
       if (k === 'h') this.toggleHUD();
       else if (k === 'f') this.toggleFullscreen();
+      else if (k === 'l') this.toggleSoundLab();
+      else if (k === 'p') this.captureScreenshot();
+      else if (k === 'o' && this.codexModal) {
+        this.codexModal.classList.toggle('active');
+        if (window.audioEngine) window.audioEngine.playHoloBeep(1200, 'triangle');
+      }
       else if (k === 'm' && window.audioEngine) {
         const isMuted = window.audioEngine.toggleMute();
         if (muteBtn) muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
@@ -174,7 +266,7 @@ class HUDManager {
         const directorBtns = document.querySelectorAll('.director-btn');
         directorBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-cam') === nextMode));
         if (window.audioEngine) window.audioEngine.playHoloBeep(980, 'sine');
-      } else if (['1', '2', '3', '4', '5', '6', '7'].includes(k)) {
+      } else if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(k)) {
         const act = parseInt(k);
         this.sm.setActiveAct(act);
         this.updateNavHighlight(act);
@@ -213,6 +305,60 @@ class HUDManager {
       this.aspectRatioMode = '16:9';
       root.style.setProperty('--letterbox-height', '0px');
       if (aspectBtn) aspectBtn.textContent = '16:9 IMAX';
+    }
+  }
+
+  toggleSoundLab() {
+    if (this.soundLabModal) {
+      const active = this.soundLabModal.classList.toggle('active');
+      if (window.audioEngine) window.audioEngine.playHoloBeep(active ? 1100 : 700, 'triangle');
+    }
+  }
+
+  handleKaossPointer(e) {
+    if (!this.kaossPad) return;
+    const rect = this.kaossPad.getBoundingClientRect();
+    const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const y = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+
+    const nx = rect.width > 0 ? (x / rect.width) : 0.5;
+    const ny = rect.height > 0 ? (1.0 - (y / rect.height)) : 0.5;
+
+    if (this.kaossCrosshair) {
+      this.kaossCrosshair.style.left = `${x}px`;
+      this.kaossCrosshair.style.top = `${y}px`;
+    }
+
+    if (window.audioEngine && typeof window.audioEngine.setFilterParams === 'function') {
+      window.audioEngine.setFilterParams(nx, ny);
+    }
+  }
+
+  captureScreenshot() {
+    const canvas = document.getElementById('webgl-canvas');
+    if (!canvas) return;
+
+    if (window.audioEngine && typeof window.audioEngine.playShutterChirp === 'function') {
+      window.audioEngine.playShutterChirp();
+    } else if (window.audioEngine) {
+      window.audioEngine.playHoloBeep(1400, 'sine');
+    }
+
+    if (this.photoNotice) {
+      this.photoNotice.classList.add('show');
+      setTimeout(() => {
+        this.photoNotice.classList.remove('show');
+      }, 2500);
+    }
+
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `AETHEL_ACT0${this.sm.currentAct}_${Date.now()}.png`;
+      a.click();
+    } catch (err) {
+      console.warn('Screenshot download blocked:', err);
     }
   }
 

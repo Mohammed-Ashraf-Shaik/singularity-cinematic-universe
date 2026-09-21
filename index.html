@@ -100,6 +100,8 @@
         </div>
 
         <div class="top-quick-actions">
+          <button id="sound-lab-btn-top" class="hud-btn sound-lab-toggle" style="border-color: var(--color-secondary);" title="Open Audio FX Studio & Kaoss Pad (Key: L)">LAB [L]</button>
+          <button id="photo-btn-top" class="hud-btn photo-toggle" style="border-color: var(--color-primary);" title="Capture 4K Wallpaper Screenshot (Key: P)">PHOTO [P]</button>
           <button id="aspect-btn" class="hud-btn" title="Toggle Cinemascope 2.39:1 / 16:9 Letterboxing">16:9 IMAX</button>
           <button id="hide-hud-btn" class="hud-btn" title="Toggle HUD Display (Key: H)">HUD [H]</button>
           <button id="fullscreen-btn" class="hud-btn" title="Toggle Fullscreen (Key: F)">⛶</button>
@@ -150,6 +152,18 @@
           <div class="act-num">ACT 07 // MULTIVERSE RIFT</div>
           <div class="act-name">TACHYON STARGATE</div>
           <div class="act-desc">Ancient Chevrons & Wormhole</div>
+        </div>
+
+        <div class="act-nav-item" data-act="8">
+          <div class="act-num">ACT 08 // NEBULA CRADLE</div>
+          <div class="act-name">PULSAR VOID NURSERY</div>
+          <div class="act-desc">Relativistic Synchrotron Jets</div>
+        </div>
+
+        <div class="act-nav-item" data-act="9">
+          <div class="act-num">ACT 09 // PRECURSOR SANCTUARY</div>
+          <div class="act-name">4D TESSERACT RUINS</div>
+          <div class="act-desc">Anti-Gravity Obsidian Monoliths</div>
         </div>
       </nav>
 
@@ -228,10 +242,12 @@
           <canvas id="audio-spectrum-canvas" width="140" height="28"></canvas>
           <button id="braaam-btn" class="hud-btn" style="padding: 4px 10px; font-size: 10px;" title="Trigger Hans Zimmer BRAAAM Horn (Key: B)">BRAAAM [B]</button>
           <button id="synthwave-btn" class="hud-btn" style="padding: 4px 10px; font-size: 10px;" title="Toggle Cyberpunk Synthwave Beat (Key: S)">SYNTH [S]</button>
+          <button id="sound-lab-btn" class="hud-btn sound-lab-toggle" style="padding: 4px 10px; font-size: 10px; border-color: var(--color-accent);" title="Holographic Kaoss Pad & Sound Lab (Key: L)">SOUND LAB [L]</button>
         </div>
 
         <!-- Right Tool Controls -->
         <div class="deck-right-tools">
+          <button id="photo-btn" class="hud-btn photo-toggle" title="Capture 4K Wallpaper Screenshot (Key: P)">📸 PHOTO [P]</button>
           <button id="voice-toggle-btn" class="hud-btn active">AI VOICE: ON</button>
           <button id="terminal-toggle-btn" class="hud-btn" style="border-color: var(--color-primary);">TERMINAL [T]</button>
         </div>
@@ -287,6 +303,41 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ==================================================================
+           PHOTO MODE NOTIFICATION
+           ================================================================== -->
+      <div id="photo-flash-notice">📸 CINEMATIC 4K FRAME CAPTURED & SAVED</div>
+
+      <!-- ==================================================================
+           SOUND LAB: HOLOGRAPHIC KAOSS PAD & AUDIO FX STUDIO
+           ================================================================== -->
+      <div id="sound-lab-modal">
+        <div class="lab-header">
+          <span>AETHEL SOUND LAB // AUDIO FX & KAOSS PAD</span>
+          <button id="sound-lab-close-btn" class="terminal-close-btn" style="font-size: 20px;">✕</button>
+        </div>
+
+        <div class="kaoss-pad-container" id="kaoss-pad">
+          <div class="kaoss-crosshair" id="kaoss-crosshair"></div>
+          <span class="kaoss-label-y">▲ RESONANCE [Q]</span>
+          <span class="kaoss-label-x">FILTER CUTOFF [Hz] ▶</span>
+        </div>
+
+        <div class="sound-triggers-grid">
+          <button class="sound-pad-btn" data-sfx="braaam">BRAAAM HORN</button>
+          <button class="sound-pad-btn" data-sfx="impact">SUB IMPACT</button>
+          <button class="sound-pad-btn" data-sfx="warp">WARP JUMP</button>
+          <button class="sound-pad-btn" data-sfx="laser">LASER VOLLEY</button>
+        </div>
+
+        <div class="sound-presets-bar">
+          <button class="preset-pill active" data-preset="interstellar">INTERSTELLAR</button>
+          <button class="preset-pill" data-preset="bladerunner">BLADE RUNNER</button>
+          <button class="preset-pill" data-preset="darkvoid">DARK VOID</button>
+          <button class="preset-pill" data-preset="supernova">SUPERNOVA</button>
         </div>
       </div>
 
