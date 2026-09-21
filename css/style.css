@@ -327,9 +327,41 @@ html, body {
   pointer-events: none !important;
 }
 
-/* Enable pointer events on interactive HUD cards */
-.hud-card, .hud-btn, .nav-btn, .director-pill, .control-btn, #terminal-container, #codex-modal {
-  pointer-events: auto;
+/* Enable pointer events on all interactive HUD elements */
+button,
+input,
+a,
+.hud-btn,
+.hud-card,
+.act-nav-item,
+.hud-left-rail,
+.director-btn,
+.director-suite,
+.sound-toggle-btn,
+.audio-visualizer-deck,
+.deck-right-tools,
+.codex-tab-btn,
+.sound-pad-btn,
+.preset-pill,
+.kaoss-pad-container,
+#terminal-modal,
+#codex-modal,
+#sound-lab-modal,
+#hud-unhide-btn {
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+#terminal-input {
+  cursor: text !important;
+}
+
+#hud-container.hud-hidden * {
+  pointer-events: none !important;
+}
+
+.reactor-btn * {
+  pointer-events: none;
 }
 
 /* TOP TELEMETRY BAR */
@@ -1192,8 +1224,16 @@ html, body {
   .top-telemetry-metrics {
     display: none;
   }
+  .hud-bottom-deck {
+    flex-wrap: wrap;
+    gap: 8px;
+    bottom: 12px;
+  }
   .director-suite {
-    display: none;
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    display: flex;
   }
 }
 
